@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Work-Burden Analysis</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card-2: #273449;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-2: #22d3ee;
+    --rent: #f97316;
+    --tax: #a78bfa;
+    --remain: #34d399;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at top, #1e293b 0%, #0f172a 60%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    line-height: 1.5;
+  }
+
+  .wrap {
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+    margin: 0 0 0.25rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    margin: 0 0 2rem;
+    font-size: 0.95rem;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--text);
+  }
+
+  .hint {
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.15);
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  button {
+    padding: 0.7rem 1.25rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.05s, filter 0.15s;
+  }
+
+  button:active { transform: translateY(1px); }
+
+  .primary {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #0f172a;
+  }
+
+  .primary:hover { filter: brightness(1.08); }
+
+  .secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .secondary:hover { color: var(--text); border-color: var(--muted); }
+
+  #results { display: none; }
+
+  .results-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .results-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--card-2);
+    color: var(--muted);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .stat {
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 0.9rem;
+  }
+
+  .stat .label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+
+  .stat .value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 0.15rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  th, td {
+    text-align: right;
+    padding: 0.55rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th:first-child, td:first-child { text-align: left; }
+
+  th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  tr.total td {
+    font-weight: 700;
+    border-top: 2px solid var(--border);
+    border-bottom: none;
+  }
+
+  .bar {
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    overflow: hidden;
+    margin: 1.25rem 0 0.5rem;
+    border: 1px solid var(--border);
+  }
+
+  .bar span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: width 0.4s ease;
+  }
+
+  .bar .rent { background: var(--rent); }
+  .bar .tax { background: var(--tax); }
+  .bar .remain { background: var(--remain); }
+
+  .legend {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .legend .dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-right: 0.35rem;
+    vertical-align: middle;
+  }
+
+  .legend .rent .dot { background: var(--rent); }
+  .legend .tax .dot { background: var(--tax); }
+  .legend .remain .dot { background: var(--remain); }
+
+  .narration {
+    margin-top: 1.25rem;
+    padding: 0.9rem 1rem;
+    border-left: 3px solid var(--accent);
+    background: rgba(56,189,248,0.06);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--text);
+    font-size: 0.92rem;
+  }
+
+  .error {
+    background: rgba(248,113,113,0.1);
+    border: 1px solid #f87171;
+    color: #fecaca;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    display: none;
+  }
+
+  @media (max-width: 480px) {
+    .bar span { font-size: 0.65rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Work-Burden Analysis</h1>
+  <p class="subtitle">See how many hours of your labor go to taxes, to your landlord (or lender), and to yourself.</p>
+
+  <div class="card">
+    <form id="input-form" novalidate>
+      <div class="grid">
+        <div>
+          <label for="salary_type">Salary type</label>
+          <select id="salary_type">
+            <option value="hourly" selected>Hourly</option>
+            <option value="annual">Annual</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="salary">
+            <span id="salary-label-text">Hourly wage ($)</span>
+          </label>
+          <input type="number" id="salary" step="0.01" min="0" value="26" required />
+        </div>
+
+        <div>
+          <label for="hours_per_week">Hours per week <span class="hint">(e.g., 40)</span></label>
+          <input type="number" id="hours_per_week" step="0.5" min="1" value="40" required />
+        </div>
+
+        <div>
+          <label for="weeks_per_year">Weeks per year <span class="hint">(52 = full year)</span></label>
+          <input type="number" id="weeks_per_year" step="1" min="1" max="52" value="52" required />
+        </div>
+
+        <div>
+          <label for="monthly_rent">Monthly rent / mortgage interest ($)</label>
+          <input type="number" id="monthly_rent" step="1" min="0" value="1700" required />
+        </div>
+
+        <div>
+          <label for="dependents">Qualifying dependent children</label>
+          <input type="number" id="dependents" step="1" min="0" value="1" required />
+        </div>
+
+        <div>
+          <label for="filing_status">Filing status</label>
+          <select id="filing_status">
+            <option value="single" selected>Single</option>
+            <option value="mfj">Married filing jointly</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="state_tax_rate">
+            State tax override <span class="hint">(blank = NM estimate)</span>
+          </label>
+          <input type="number" id="state_tax_rate" step="0.001" min="0" max="1" placeholder="e.g., 0.03" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="primary">Run analysis</button>
+        <button type="button" class="secondary" id="reset-btn">Reset</button>
+      </div>
+
+      <div class="error" id="error-box"></div>
+    </form>
+  </div>
+
+  <div class="card" id="results">
+    <div class="results-header">
+      <h2>Results</h2>
+      <span class="tag" id="tag-filing">single · 1 dependent</span>
+    </div>
+
+    <div class="summary">
+      <div class="stat">
+        <div class="label">Hourly wage</div>
+        <div class="value" id="out-hourly">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">Annual gross</div>
+        <div class="value" id="out-annual">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">Monthly gross</div>
+        <div class="value" id="out-monthly">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">Monthly hours</div>
+        <div class="value" id="out-hours">—</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Obligation</th>
+          <th>Monthly $</th>
+          <th>Hours</th>
+          <th>Shifts*</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+
+    <div class="bar" id="bar">
+      <span class="rent" id="bar-rent">—</span>
+      <span class="tax" id="bar-tax">—</span>
+      <span class="remain" id="bar-remain">—</span>
+    </div>
+    <div class="legend">
+      <span class="rent"><span class="dot"></span>Rent / interest</span>
+      <span class="tax"><span class="dot"></span>Taxes</span>
+      <span class="remain"><span class="dot"></span>Remainder</span>
+    </div>
+
+    <div class="narration" id="narration"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   Core analysis function (ported from the Python version)
+   ========================================================= */
+const SHIFT_HOURS = 12; // set to 8 if you want 8-hour days
+const WORKDAY_HOURS = 8; // set to 8 if you want 8-hour days
+
+function analyzeWorkBurden({
+  salary,
+  salaryType = "hourly",
+  hoursPerWeek = 40,
+  weeksPerYear = 52,
+  monthlyRent = 0,
+  dependents = 0,
+  filingStatus = "single",
+  stateTaxRate = null,
+}) {
+  // --- 1. Normalize to hourly wage and annual gross ---
+  let annualGross, hourlyWage;
+  if (salaryType === "annual") {
+    annualGross = salary;
+    const totalHours = hoursPerWeek * weeksPerYear;
+    hourlyWage = totalHours ? annualGross / totalHours : 0;
+  } else {
+    hourlyWage = salary;
+    annualGross = hourlyWage * hoursPerWeek * weeksPerYear;
+  }
+
+  const monthlyGross = annualGross / 12;
+  const monthlyHours = (hoursPerWeek * weeksPerYear) / 12;
+
+  // --- 2. FICA (Social Security + Medicare) ---
+  const SS_WAGE_BASE = 184500;
+  const ssTaxable = Math.min(annualGross, SS_WAGE_BASE);
+  const ficaAnnual = ssTaxable * 0.062 + annualGross * 0.0145;
+
+  // --- 3. Federal income tax (2026 brackets) ---
+  let standardDeduction, brackets;
+  if (filingStatus === "single") {
+    standardDeduction = 16100;
+    brackets = [
+      [12400, 0.10],
+      [50400, 0.12],
+      [105700, 0.22],
+      [201775, 0.24],
+      [256500, 0.32],
+      [640600, 0.35],
+      [Infinity, 0.37],
+    ];
+  } else {
+    standardDeduction = 32200;
+    brackets = [
+      [24800, 0.10],
+      [100800, 0.12],
+      [211400, 0.22],
+      [403550, 0.24],
+      [513000, 0.32],
+      [768700, 0.35],
+      [Infinity, 0.37],
+    ];
+  }
+
+  const taxableIncome = Math.max(0, annualGross - standardDeduction);
+  let federalTax = 0;
+  let prevLimit = 0;
+  for (const [limit, rate] of brackets) {
+    if (taxableIncome > prevLimit) {
+      federalTax += (Math.min(taxableIncome, limit) - prevLimit) * rate;
+      prevLimit = limit;
+    } else break;
+  }
+
+  // Child Tax Credit (2026: $2,200 per child)
+  let ctc = 0;
+  if (dependents > 0) {
+    const phaseOutThreshold = filingStatus === "single" ? 200000 : 400000;
+    const excess = Math.max(0, annualGross - phaseOutThreshold);
+    const reduction = Math.floor(excess / 1000) * 50;
+    ctc = Math.max(0, dependents * 2200 - reduction);
+  }
+  const federalTaxNet = Math.max(0, federalTax - ctc);
+
+  // --- 4. State income tax ---
+  let stateTaxAnnual;
+  if (stateTaxRate === null || stateTaxRate === undefined || isNaN(stateTaxRate)) {
+    if (filingStatus === "single") {
+      stateTaxAnnual = Math.max(0, annualGross - 19000) * 0.043;
+    } else {
+      stateTaxAnnual = Math.max(0, annualGross - 38000) * 0.043;
+    }
+  } else {
+    stateTaxAnnual = annualGross * stateTaxRate;
+  }
+
+  // --- 5. Monthly totals ---
+  const monthlyFica = ficaAnnual / 12;
+  const monthlyFederal = federalTaxNet / 12;
+  const monthlyState = stateTaxAnnual / 12;
+  const monthlyTaxTotal = monthlyFica + monthlyFederal + monthlyState;
+  const monthlyRemainder = monthlyGross - monthlyTaxTotal - monthlyRent;
+
+  // --- 6. Convert to hours and shifts ---
+  const hoursFor = (cost) => (hourlyWage ? cost / hourlyWage : Infinity);
+  const hoursTaxes = hoursFor(monthlyTaxTotal);
+  const hoursRent = hoursFor(monthlyRent);
+  const hoursRemainder = hoursFor(monthlyRemainder);
+
+  return {
+    hourlyWage,
+    annualGross,
+    monthlyGross,
+    monthlyHours,
+    monthlyFica,
+    monthlyFederal,
+    monthlyState,
+    monthlyTaxTotal,
+    monthlyRent,
+    monthlyRemainder,
+    hoursTaxes,
+    hoursRent,
+    hoursRemainder,
+    shiftsTaxes: hoursTaxes / SHIFT_HOURS,
+    shiftsRent: hoursRent / SHIFT_HOURS,
+    shiftsRemainder: hoursRemainder / SHIFT_HOURS,
+    shiftHours: SHIFT_HOURS,
+    workdayTaxes: hoursTaxes / WORKDAY_HOURS,
+    shiftsRent: hoursRent / WORKDAY_HOURS,
+    shiftsRemainder: hoursRemainder / WORKDAY_HOURS,
+    shiftHours: WORKDAY_HOURS,
+  };
+}
+
+/* =========================================================
+   UI logic
+   ========================================================= */
+const $ = (id) => document.getElementById(id);
+
+const fmtMoney = (n) =>
+  "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const fmtMoneyShort = (n) =>
+  "$" + Math.round(n).toLocaleString("en-US");
+
+const fmtHours = (n) =>
+  (isFinite(n) ? n.toFixed(1) : "∞") + " hrs";
+
+const fmtShifts = (n) =>
+  (isFinite(n) ? n.toFixed(2) : "∞") + " shifts";
+
+// Update the salary label when type changes
+$("salary_type").addEventListener("change", (e) => {
+  const isHourly = e.target.value === "hourly";
+  $("salary-label-text").textContent = isHourly ? "Hourly wage ($)" : "Annual salary ($)";
+  $("salary").value = isHourly ? "26" : "54080";
+});
+
+function showError(msg) {
+  const box = $("error-box");
+  box.textContent = msg;
+  box.style.display = "block";
+}
+
+function clearError() {
+  const box = $("error-box");
+  box.textContent = "";
+  box.style.display = "none";
+}
+
+$("input-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  clearError();
+
+  // --- Read and validate inputs ---
+  const salaryType = $("salary_type").value;
+  const salary = parseFloat($("salary").value);
+  const hoursPerWeek = parseFloat($("hours_per_week").value);
+  const weeksPerYear = parseFloat($("weeks_per_year").value);
+  const monthlyRent = parseFloat($("monthly_rent").value);
+  const dependents = parseInt($("dependents").value, 10);
+  const filingStatus = $("filing_status").value;
+  const stateRaw = $("state_tax_rate").value.trim();
+  const stateTaxRate = stateRaw === "" ? null : parseFloat(stateRaw);
+
+  const errors = [];
+  if (!isFinite(salary) || salary < 0) errors.push("Salary must be a non-negative number.");
+  if (!isFinite(hoursPerWeek) || hoursPerWeek <= 0) errors.push("Hours per week must be greater than 0.");
+  if (!isFinite(weeksPerYear) || weeksPerYear <= 0 || weeksPerYear > 52)
+    errors.push("Weeks per year must be between 1 and 52.");
+  if (!isFinite(monthlyRent) || monthlyRent < 0) errors.push("Rent must be a non-negative number.");
+  if (!Number.isInteger(dependents) || dependents < 0) errors.push("Dependents must be a non-negative integer.");
+  if (stateTaxRate !== null && (!isFinite(stateTaxRate) || stateTaxRate < 0 || stateTaxRate > 1))
+    errors.push("State tax rate must be between 0 and 1 (e.g., 0.03 for 3%).");
+
+  if (errors.length) {
+    showError(errors.join(" "));
+    return;
+  }
+
+  // --- Run analysis ---
+  const r = analyzeWorkBurden({
+    salary,
+    salaryType,
+    hoursPerWeek,
+    weeksPerYear,
+    monthlyRent,
+    dependents,
+    filingStatus,
+    stateTaxRate,
+  });
+
+  // --- Render header / summary ---
+  $("tag-filing").textContent =
+    (filingStatus === "single" ? "single" : "married filing jointly") +
+    " · " +
+    dependents +
+    " dependent" + (dependents === 1 ? "" : "s");
+
+  $("out-hourly").textContent = fmtMoney(r.hourlyWage);
+  $("out-annual").textContent = fmtMoneyShort(r.annualGross);
+  $("out-monthly").textContent = fmtMoneyShort(r.monthlyGross);
+  $("out-hours").textContent = r.monthlyHours.toFixed(1) + " hrs";
+
+  // --- Render table ---
+  const rows = [
+    ["FICA", r.monthlyFica, r.monthlyFica / r.hourlyWage],
+    ["Federal income tax", r.monthlyFederal, r.monthlyFederal / r.hourlyWage],
+    ["State income tax", r.monthlyState, r.monthlyState / r.hourlyWage],
+    ["Total taxes", r.monthlyTaxTotal, r.hoursTaxes, true],
+    ["Rent / mortgage interest", r.monthlyRent, r.hoursRent],
+    ["Remainder", r.monthlyRemainder, r.hoursRemainder, true],
+  ];
+
+  const tbody = $("table-body");
+  tbody.innerHTML = "";
+  for (const [label, cost, hrs, isTotal] of rows) {
+    const tr = document.createElement("tr");
+    if (isTotal) tr.classList.add("total");
+    tr.innerHTML = `
+      <td>${label}</td>
+      <td>${fmtMoney(cost)}</td>
+      <td>${fmtHours(hrs)}</td>
+      <td>${fmtShifts(hrs / WORKDAY_HOURS)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  // --- Render bar (as percentages of monthly gross) ---
+  const total = r.monthlyTaxTotal + r.monthlyRent + Math.max(0, r.monthlyRemainder);
+  const pct = (v) => (total > 0 ? (v / total) * 100 : 0);
+  const rentPct = pct(r.monthlyRent);
+  const taxPct = pct(r.monthlyTaxTotal);
+  const remainPct = pct(Math.max(0, r.monthlyRemainder));
+
+  $("bar-rent").style.width = rentPct + "%";
+  $("bar-tax").style.width = taxPct + "%";
+  $("bar-remain").style.width = remainPct + "%";
+
+  $("bar-rent").textContent = rentPct > 12 ? rentPct.toFixed(0) + "%" : "";
+  $("bar-tax").textContent = taxPct > 12 ? taxPct.toFixed(0) + "%" : "";
+  $("bar-remain").textContent = remainPct > 12 ? remainPct.toFixed(0) + "%" : "";
+
+  // --- Narration ---
+  const landlordHours = r.hoursRent;
+  const taxHours = r.hoursTaxes;
+  const selfHours = r.hoursRemainder;
+
+  let narration = "";
+  if (landlordHours > selfHours) {
+    narration =
+    //   `This person works <strong>${landlordHours.toFixed(1)} hours</strong> per month for their landlord — ` +
+    //   `more than the <strong>${selfHours.toFixed(1)} hours</strong> left over for themselves after taxes and rent. ` +
+    //   `At ${SHIFT_HOURS}-hour shifts, that's <strong>${(landlordHours / SHIFT_HOURS).toFixed(2)} full shifts</strong> ` +
+    //   `to the landlord and <strong>${(taxHours / SHIFT_HOURS).toFixed(2)}</strong> to the government.`;
+      `This person works <strong>${landlordHours.toFixed(1)} hours</strong> per month for their landlord — ` +
+      `more than the <strong>${selfHours.toFixed(1)} hours</strong> left over for themselves after taxes and rent. ` +
+      `For ${WORKDAY_HOURS}-hour workdays, that's <strong>${(landlordHours / WORKDAY_HOURS).toFixed(2)} full workdays</strong> ` +
+      `to the landlord and <strong>${(taxHours / WORKDAY_HOURS).toFixed(2)}</strong> to the government.`;
+  } else {
+    narration =
+    //   `This person works <strong>${landlordHours.toFixed(1)} hours</strong> per month for their landlord, ` +
+    //   `<strong>${taxHours.toFixed(1)} hours</strong> for taxes, and keeps <strong>${selfHours.toFixed(1)} hours</strong> ` +
+    //   `for themselves. At ${SHIFT_HOURS}-hour shifts, that's ` +
+    //   `<strong>${(landlordHours / SHIFT_HOURS).toFixed(2)}</strong> shifts for the landlord and ` +
+    //   `<strong>${(taxHours / SHIFT_HOURS).toFixed(2)}</strong> for taxes.`;
+      `This person works <strong>${landlordHours.toFixed(1)} hours</strong> per month for their landlord, ` +
+      `<strong>${taxHours.toFixed(1)} hours</strong> for taxes, and keeps <strong>${selfHours.toFixed(1)} hours</strong> ` +
+      `for themselves. For ${WORKDAY_HOURS}-hour workdays, that's ` +
+      `<strong>${(landlordHours / WORKDAY_HOURS).toFixed(2)}</strong> workdays for the landlord and ` +
+      `<strong>${(taxHours / WORKDAY_HOURS).toFixed(2)}</strong> for taxes.`;
+  }
+  $("narration").innerHTML = narration;
+
+  // --- Show results ---
+  $("results").style.display = "block";
+  $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+// Reset button
+$("reset-btn").addEventListener("click", () => {
+  $("input-form").reset();
+  $("salary_type").value = "hourly";
+  $("salary-label-text").textContent = "Hourly wage ($)";
+  $("salary").value = "26";
+  $("hours_per_week").value = "40";
+  $("weeks_per_year").value = "52";
+  $("monthly_rent").value = "1700";
+  $("dependents").value = "1";
+  $("filing_status").value = "single";
+  $("state_tax_rate").value = "";
+  clearError();
+  $("results").style.display = "none";
+});
+</script>
+</body>
+</html>
