@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Who are you Really Working For? — A Zine from the Albuquerque Tenant Assembly</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card-2: #273449;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-2: #22d3ee;
+    --rent: #f97316;
+    --tax: #a78bfa;
+    --remain: #34d399;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at top, #1e293b 0%, #0f172a 60%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+    line-height: 1.65;
+  }
+
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Cover ---------- */
+  .cover {
+    text-align: center;
+    padding: 2.5rem 1.5rem 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+
+  .cover .kicker {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  .cover h1 {
+    font-size: clamp(2rem, 6vw, 3rem);
+    line-height: 1.1;
+    margin: 0 0 1rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .cover .byline {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .cover .byline strong {
+    color: var(--text);
+  }
+
+  /* ---------- Panels ---------- */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.75rem 1.75rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    position: relative;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel .num {
+    position: absolute;
+    top: -14px;
+    left: 1.5rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 0.85rem;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(56,189,248,0.3);
+  }
+
+  .panel p {
+    margin: 0 0 1rem;
+  }
+
+  .panel p:last-child {
+    margin-bottom: 0;
+  }
+
+  .panel strong {
+    color: #fff;
+  }
+
+  /* ---------- Highlighted "math" callout ---------- */
+  .callout {
+    background: var(--card-2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    font-size: 0.95rem;
+  }
+
+  .callout .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .callout .row:last-child {
+    border-bottom: none;
+    font-weight: 700;
+    color: #fff;
+    padding-top: 0.5rem;
+  }
+
+  .callout .row .label { color: var(--muted); }
+  .callout .row .value { font-variant-numeric: tabular-nums; }
+
+  .accent-rent { color: var(--rent); font-weight: 700; }
+  .accent-tax { color: var(--tax); font-weight: 700; }
+  .accent-remain { color: var(--remain); font-weight: 700; }
+
+  /* ---------- Pull quote ---------- */
+  .pullquote {
+    font-size: 1.15rem;
+    font-style: italic;
+    text-align: center;
+    color: var(--accent-2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 0.5rem;
+    margin: 1.5rem 0;
+  }
+
+  /* ---------- Small muted aside ---------- */
+  .aside {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 0.75rem;
+  }
+
+  /* ---------- Final CTA ---------- */
+  .cta {
+    text-align: center;
+    background: linear-gradient(160deg, var(--card-2), var(--card));
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .cta h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.5rem;
+    color: #fff;
+  }
+
+  .cta p {
+    color: var(--muted);
+    margin: 0 0 1.5rem;
+  }
+
+  .cta .buttons {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .cta a.button {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: filter 0.15s, transform 0.05s;
+  }
+
+  .cta a.button:active { transform: translateY(1px); }
+
+  .cta a.primary {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #0f172a;
+  }
+
+  .cta a.primary:hover { filter: brightness(1.08); }
+
+  .cta a.secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .cta a.secondary:hover { color: var(--text); border-color: var(--muted); }
+
+  /* ---------- QR code placeholder ---------- */
+  .qr {
+    width: 140px;
+    height: 140px;
+    margin: 1.5rem auto 0;
+    background: #fff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0f172a;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 0.5rem;
+    line-height: 1.2;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  /* ---------- Footer ---------- */
+  .footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 480px) {
+    .panel { padding: 1.5rem 1.25rem 1.25rem; }
+    .cover { padding: 1.5rem 0.5rem 2rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ COVER ============ -->
+  <header class="cover">
+    <div class="kicker">A Zine About Work &amp; Rent</div>
+    <h1>Who are you Really working for?</h1>
+    <p class="byline">by the<strong>Albuquerque Tenant Assembly</strong> · Albuquerque, NM</p>
+  </header>
+
+  <!-- ============ PANEL 1 ============ -->
+  <section class="panel">
+    <div class="num">1</div>
+    <p>Hi, I'm Jessica! I'm a single mom and I work as an ambulance medic here in Albuquerque. The cost of everything keeps going up, including the rent on my two-bedroom house, but I work hard and always make sure my 6 year-old boy has everything he needs.</p>
+  </section>
+
+  <!-- ============ PANEL 2 ============ -->
+  <section class="panel">
+    <div class="num">2</div>
+    <p>I had a realization a few days ago that shocked me. I spend more of my time making money for my landlord than I do for myself! I feel a little bit crazy because nearly everyone I know must be in the same boat, but no one ever talks about it. I've triple checked my math and I know it's right. Let me walk you through it:</p>
+  </section>
+
+  <!-- ============ PANEL 3 ============ -->
+  <section class="panel">
+    <div class="num">3</div>
+    <p>Most weeks I work three 12-hr shifts, so usually about 12 shifts in a month. I make $26 per hour, so that's $312 per shift. I have a W-2 so after my tax withholding I only take home $268 per shift on my paycheck. That means that every month about one and a half of my shifts are spent paying my taxes.</p>
+
+    <div class="callout">
+      <div class="row">
+        <span class="label">Hourly wage</span>
+        <span class="value">$26.00</span>
+      </div>
+      <div class="row">
+        <span class="label">Gross per 12-hr shift</span>
+        <span class="value">$312.00</span>
+      </div>
+      <div class="row">
+        <span class="label">Take-home per shift</span>
+        <span class="value">$268.00</span>
+      </div>
+      <div class="row">
+        <span class="label">Shifts per month for taxes</span>
+        <span class="value accent-tax">~1.5 shifts</span>
+      </div>
+    </div>
+
+    <p>That's kind of frustrating to think about, especially when I know that the CEO of the hospital pays almost none.</p>
+    <p class="aside">(Someone should look up an example of this.)</p>
+  </section>
+
+  <!-- ============ PANEL 4 ============ -->
+  <section class="panel">
+    <div class="num">4</div>
+    <p>I know that taxes are a fact of life, and everyone has to deal with them (except the billionaires apparently). But taxes aren't where most of my income goes. Me and my son live in a small 2-bedroom house. The monthly rent is $1700.</p>
+
+    <div class="callout">
+      <div class="row">
+        <span class="label">Monthly rent</span>
+        <span class="value">$1,700.00</span>
+      </div>
+      <div class="row">
+        <span class="label">Shifts per month for rent</span>
+        <span class="value accent-rent">~5.5 shifts</span>
+      </div>
+    </div>
+
+    <div class="pullquote">
+      "I spend more time every month working for the government and my landlord than I do for my son and myself."
+    </div>
+  </section>
+
+  <!-- ============ PANEL 5 ============ -->
+  <section class="panel">
+    <div class="num">5</div>
+    <p>I know I'm not the only one who experiences this, in fact I'm better off than most of my friends and neighbors. My job is at least stable — there will always be emergencies that people with my training will need to respond to.</p>
+    <p>One of my neighbors is a construction worker, but the last job he was able to get was working on a data center. Another friend was a data analyst for a surveying company, but her company cut half their workforce last year, probably because of the AI that runs on that very same data center.</p>
+    <p>Without regular income they don't owe much in taxes anymore, but their landlords are not so understanding. <strong>I'm worried they might get evicted.</strong></p>
+  </section>
+
+  <!-- ============ PANEL 6 ============ -->
+  <section class="panel">
+    <div class="num">6</div>
+    <p>I have a good relationship with my dad, but he doesn't understand when I talk about these things. He was a plumber and he worked hard to provide for our family, but he thinks I complain too much about this.</p>
+    <p>I asked him what his budget was like back then and was shocked at how much less he paid for our house. He had a mortgage and his monthly payment was far less than I pay in rent today, plus he now owns his house outright.</p>
+    <p>He's thinking of buying another one and becoming a landlord himself.</p>
+  </section>
+
+  <!-- ============ PANEL 7 ============ -->
+  <section class="panel">
+    <div class="num">7</div>
+    <p>It feels like there is nothing I can do about this. How did we get into this situation, where so many of us spend more time making other people rich than we do meeting our own needs?</p>
+    <p>I don't want to complain about it to my landlord because if I get kicked out of this house then I'll be in an even worse situation.</p>
+    <p>Recently I learned about something called a <strong>tenants' union</strong>. I've heard of labor unions, and I know that they used to be a powerful force in making working conditions better. Maybe if enough of us tenants start talking, we can come up with some strategies to get some of that power to make things better for ourselves.</p>
+  </section>
+
+  <!-- ============ PANEL 8 / CTA ============ -->
+  <section class="cta">
+    <h2>What about you?</h2>
+    <p>How much of your time do you spend working to feed your landlord? Try our calculator and get in touch with people who want to work together to build community power so we can make things better for ourselves and our families.</p>
+
+    <div class="buttons">
+      <a href="workburden.html" class="button primary">Run the calculator</a>
+      <a href="#" class="button secondary">Get involved</a>
+    </div>
+
+    <div class="qr">QR CODE<br />scan to open<br />the calculator</div>
+  </section>
+
+  <footer class="footer">
+    <p>Made by neighbors, for neighbors. Share freely.</p>
+    <p><a href="workburden.html">← Back to the calculator</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
