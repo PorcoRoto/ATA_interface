@@ -32,7 +32,7 @@
   }
 
   .wrap {
-    max-width: 820px;
+    max-width: 860px;
     margin: 0 auto;
   }
 
@@ -281,8 +281,10 @@
     display: none;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 620px) {
     .bar span { font-size: 0.65rem; }
+    table { font-size: 0.82rem; }
+    th, td { padding: 0.45rem 0.3rem; }
   }
 </style>
 </head>
@@ -317,6 +319,21 @@
         <div>
           <label for="weeks_per_year">Weeks per year <span class="hint">(52 = full year)</span></label>
           <input type="number" id="weeks_per_year" step="1" min="1" max="52" value="52" required />
+        </div>
+
+        <div>
+          <label for="shift_length">Shift length <span class="hint">(used in results table)</span></label>
+          <select id="shift_length">
+            <option value="8">8 hours</option>
+            <option value="10">10 hours</option>
+            <option value="12" selected>12 hours</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </div>
+
+        <div id="custom-shift-wrap" style="display:none;">
+          <label for="custom_shift">Custom shift length (hours)</label>
+          <input type="number" id="custom_shift" step="0.5" min="1" max="24" value="12" />
         </div>
 
         <div>
@@ -381,11 +398,12 @@
 
     <table>
       <thead>
-        <tr>
+        <tr id="table-head-row">
           <th>Obligation</th>
           <th>Monthly $</th>
           <th>Hours</th>
-          <th>Shifts*</th>
+          <th>8-hr days</th>
+          <th id="shift-col-header">12-hr shifts</th>
         </tr>
       </thead>
       <tbody id="table-body"></tbody>
@@ -404,18 +422,13 @@
 
     <div class="narration" id="narration"></div>
   </div>
-  <footer class="footer">
-    <p>Made by neighbors, for neighbors. Share freely.</p>
-    <p><a href="index.html">← Back to the zine</a></p>
-  </footer>
 </div>
 
 <script>
 /* =========================================================
-   Core analysis function (ported from the Python version)
+   Core analysis function
    ========================================================= */
-const SHIFT_HOURS = 12; // set to 8 if you want 8-hour days
-const WORKDAY_HOURS = 8; // set to 8 if you want 8-hour days
+const EIGHT_HOUR_DAY = 8;
 
 function analyzeWorkBurden({
   salary,
@@ -426,6 +439,7 @@ function analyzeWorkBurden({
   dependents = 0,
   filingStatus = "single",
   stateTaxRate = null,
+  shiftLength = 12,
 }) {
   // --- 1. Normalize to hourly wage and annual gross ---
   let annualGross, hourlyWage;
@@ -441,7 +455,7 @@ function analyzeWorkBurden({
   const monthlyGross = annualGross / 12;
   const monthlyHours = (hoursPerWeek * weeksPerYear) / 12;
 
-  // --- 2. FICA (Social Security + Medicare) ---
+  // --- 2. FICA ---
   const SS_WAGE_BASE = 184500;
   const ssTaxable = Math.min(annualGross, SS_WAGE_BASE);
   const ficaAnnual = ssTaxable * 0.062 + annualGross * 0.0145;
@@ -511,17 +525,23 @@ function analyzeWorkBurden({
   const monthlyTaxTotal = monthlyFica + monthlyFederal + monthlyState;
   const monthlyRemainder = monthlyGross - monthlyTaxTotal - monthlyRent;
 
-  // --- 6. Convert to hours and shifts ---
+  // --- 6. Convert to hours, 8-hr days, and chosen shifts ---
   const hoursFor = (cost) => (hourlyWage ? cost / hourlyWage : Infinity);
   const hoursTaxes = hoursFor(monthlyTaxTotal);
   const hoursRent = hoursFor(monthlyRent);
   const hoursRemainder = hoursFor(monthlyRemainder);
+
+  // Distribute tax hours across components proportionally
+  const taxShare = (amount) =>
+    monthlyTaxTotal > 0 ? amount / monthlyTaxTotal : 0;
+  const componentHours = (amount) => hoursTaxes * taxShare(amount);
 
   return {
     hourlyWage,
     annualGross,
     monthlyGross,
     monthlyHours,
+    shiftLength,
     monthlyFica,
     monthlyFederal,
     monthlyState,
@@ -531,14 +551,20 @@ function analyzeWorkBurden({
     hoursTaxes,
     hoursRent,
     hoursRemainder,
-    shiftsTaxes: hoursTaxes / SHIFT_HOURS,
-    shiftsRent: hoursRent / SHIFT_HOURS,
-    shiftsRemainder: hoursRemainder / SHIFT_HOURS,
-    shiftHours: SHIFT_HOURS,
-    workdayTaxes: hoursTaxes / WORKDAY_HOURS,
-    shiftsRent: hoursRent / WORKDAY_HOURS,
-    shiftsRemainder: hoursRemainder / WORKDAY_HOURS,
-    shiftHours: WORKDAY_HOURS,
+    // 8-hour days
+    daysFica: componentHours(monthlyFica) / EIGHT_HOUR_DAY,
+    daysFederal: componentHours(monthlyFederal) / EIGHT_HOUR_DAY,
+    daysState: componentHours(monthlyState) / EIGHT_HOUR_DAY,
+    daysTaxes: hoursTaxes / EIGHT_HOUR_DAY,
+    daysRent: hoursRent / EIGHT_HOUR_DAY,
+    daysRemainder: hoursRemainder / EIGHT_HOUR_DAY,
+    // chosen-length shifts
+    shiftsFica: componentHours(monthlyFica) / shiftLength,
+    shiftsFederal: componentHours(monthlyFederal) / shiftLength,
+    shiftsState: componentHours(monthlyState) / shiftLength,
+    shiftsTaxes: hoursTaxes / shiftLength,
+    shiftsRent: hoursRent / shiftLength,
+    shiftsRemainder: hoursRemainder / shiftLength,
   };
 }
 
@@ -554,16 +580,24 @@ const fmtMoneyShort = (n) =>
   "$" + Math.round(n).toLocaleString("en-US");
 
 const fmtHours = (n) =>
-  (isFinite(n) ? n.toFixed(1) : "∞") + " hrs";
+  (isFinite(n) ? n.toFixed(1) : "∞");
+
+const fmtDays = (n) =>
+  (isFinite(n) ? n.toFixed(2) : "∞");
 
 const fmtShifts = (n) =>
-  (isFinite(n) ? n.toFixed(2) : "∞") + " shifts";
+  (isFinite(n) ? n.toFixed(2) : "∞");
 
-// Update the salary label when type changes
 $("salary_type").addEventListener("change", (e) => {
   const isHourly = e.target.value === "hourly";
   $("salary-label-text").textContent = isHourly ? "Hourly wage ($)" : "Annual salary ($)";
   $("salary").value = isHourly ? "26" : "54080";
+});
+
+// Show/hide custom shift input when the dropdown changes
+$("shift_length").addEventListener("change", (e) => {
+  const isCustom = e.target.value === "custom";
+  $("custom-shift-wrap").style.display = isCustom ? "block" : "none";
 });
 
 function showError(msg) {
@@ -582,7 +616,6 @@ $("input-form").addEventListener("submit", (e) => {
   e.preventDefault();
   clearError();
 
-  // --- Read and validate inputs ---
   const salaryType = $("salary_type").value;
   const salary = parseFloat($("salary").value);
   const hoursPerWeek = parseFloat($("hours_per_week").value);
@@ -593,6 +626,13 @@ $("input-form").addEventListener("submit", (e) => {
   const stateRaw = $("state_tax_rate").value.trim();
   const stateTaxRate = stateRaw === "" ? null : parseFloat(stateRaw);
 
+  // Resolve shift length
+  const shiftChoice = $("shift_length").value;
+  const shiftLength =
+    shiftChoice === "custom"
+      ? parseFloat($("custom_shift").value)
+      : parseFloat(shiftChoice);
+
   const errors = [];
   if (!isFinite(salary) || salary < 0) errors.push("Salary must be a non-negative number.");
   if (!isFinite(hoursPerWeek) || hoursPerWeek <= 0) errors.push("Hours per week must be greater than 0.");
@@ -602,13 +642,14 @@ $("input-form").addEventListener("submit", (e) => {
   if (!Number.isInteger(dependents) || dependents < 0) errors.push("Dependents must be a non-negative integer.");
   if (stateTaxRate !== null && (!isFinite(stateTaxRate) || stateTaxRate < 0 || stateTaxRate > 1))
     errors.push("State tax rate must be between 0 and 1 (e.g., 0.03 for 3%).");
+  if (!isFinite(shiftLength) || shiftLength <= 0 || shiftLength > 24)
+    errors.push("Shift length must be between 0 and 24 hours.");
 
   if (errors.length) {
     showError(errors.join(" "));
     return;
   }
 
-  // --- Run analysis ---
   const r = analyzeWorkBurden({
     salary,
     salaryType,
@@ -618,45 +659,74 @@ $("input-form").addEventListener("submit", (e) => {
     dependents,
     filingStatus,
     stateTaxRate,
+    shiftLength,
   });
 
-  // --- Render header / summary ---
+  // --- Summary stats ---
   $("tag-filing").textContent =
     (filingStatus === "single" ? "single" : "married filing jointly") +
     " · " +
     dependents +
-    " dependent" + (dependents === 1 ? "" : "s");
+    " dependent" + (dependents === 1 ? "" : "s") +
+    " · " +
+    shiftLength +
+    "-hr shifts";
 
   $("out-hourly").textContent = fmtMoney(r.hourlyWage);
   $("out-annual").textContent = fmtMoneyShort(r.annualGross);
   $("out-monthly").textContent = fmtMoneyShort(r.monthlyGross);
   $("out-hours").textContent = r.monthlyHours.toFixed(1) + " hrs";
 
-  // --- Render table ---
+  // --- Decide whether to show both columns ---
+  // If the chosen shift length equals 8, the two columns would be identical,
+  // so hide the "8-hr days" column and use "shifts" only.
+  const showBothColumns = Math.abs(shiftLength - EIGHT_HOUR_DAY) > 0.001;
+  const shiftHeader = $("shift-col-header");
+  const headRow = $("table-head-row");
+
+  // Rebuild header to toggle the 8-hr column
+  headRow.innerHTML = showBothColumns
+    ? `<th>Obligation</th>
+       <th>Monthly $</th>
+       <th>Hours</th>
+       <th>8-hr days</th>
+       <th>${shiftLength}-hr shifts</th>`
+    : `<th>Obligation</th>
+       <th>Monthly $</th>
+       <th>Hours</th>
+       <th>${shiftLength}-hr shifts</th>`;
+
+  // --- Table rows: [label, cost, hours, days, shifts, isTotal] ---
   const rows = [
-    ["FICA", r.monthlyFica, r.monthlyFica / r.hourlyWage],
-    ["Federal income tax", r.monthlyFederal, r.monthlyFederal / r.hourlyWage],
-    ["State income tax", r.monthlyState, r.monthlyState / r.hourlyWage],
-    ["Total taxes", r.monthlyTaxTotal, r.hoursTaxes, true],
-    ["Rent / mortgage interest", r.monthlyRent, r.hoursRent],
-    ["Remainder", r.monthlyRemainder, r.hoursRemainder, true],
+    ["FICA", r.monthlyFica, r.monthlyFica / r.hourlyWage, r.daysFica, r.shiftsFica],
+    ["Federal income tax", r.monthlyFederal, r.monthlyFederal / r.hourlyWage, r.daysFederal, r.shiftsFederal],
+    ["State income tax", r.monthlyState, r.monthlyState / r.hourlyWage, r.daysState, r.shiftsState],
+    ["Total taxes", r.monthlyTaxTotal, r.hoursTaxes, r.daysTaxes, r.shiftsTaxes, true],
+    ["Rent / mortgage interest", r.monthlyRent, r.hoursRent, r.daysRent, r.shiftsRent],
+    ["Remainder", r.monthlyRemainder, r.hoursRemainder, r.daysRemainder, r.shiftsRemainder, true],
   ];
 
   const tbody = $("table-body");
   tbody.innerHTML = "";
-  for (const [label, cost, hrs, isTotal] of rows) {
+  for (const [label, cost, hrs, days, shifts, isTotal] of rows) {
     const tr = document.createElement("tr");
     if (isTotal) tr.classList.add("total");
-    tr.innerHTML = `
-      <td>${label}</td>
-      <td>${fmtMoney(cost)}</td>
-      <td>${fmtHours(hrs)}</td>
-      <td>${fmtShifts(hrs / WORKDAY_HOURS)}</td>
-    `;
+
+    const cells = [
+      `<td>${label}</td>`,
+      `<td>${fmtMoney(cost)}</td>`,
+      `<td>${fmtHours(hrs)}</td>`,
+    ];
+    if (showBothColumns) {
+      cells.push(`<td>${fmtDays(days)}</td>`);
+    }
+    cells.push(`<td>${fmtShifts(shifts)}</td>`);
+
+    tr.innerHTML = cells.join("");
     tbody.appendChild(tr);
   }
 
-  // --- Render bar (as percentages of monthly gross) ---
+  // --- Bar chart ---
   const total = r.monthlyTaxTotal + r.monthlyRent + Math.max(0, r.monthlyRemainder);
   const pct = (v) => (total > 0 ? (v / total) * 100 : 0);
   const rentPct = pct(r.monthlyRent);
@@ -679,35 +749,33 @@ $("input-form").addEventListener("submit", (e) => {
   let narration = "";
   if (landlordHours > selfHours) {
     narration =
-    //   `This person works <strong>${landlordHours.toFixed(1)} hours</strong> per month for their landlord — ` +
-    //   `more than the <strong>${selfHours.toFixed(1)} hours</strong> left over for themselves after taxes and rent. ` +
-    //   `At ${SHIFT_HOURS}-hour shifts, that's <strong>${(landlordHours / SHIFT_HOURS).toFixed(2)} full shifts</strong> ` +
-    //   `to the landlord and <strong>${(taxHours / SHIFT_HOURS).toFixed(2)}</strong> to the government.`;
       `This person works <strong>${landlordHours.toFixed(1)} hours</strong> per month for their landlord — ` +
       `more than the <strong>${selfHours.toFixed(1)} hours</strong> left over for themselves after taxes and rent. ` +
-      `For ${WORKDAY_HOURS}-hour workdays, that's <strong>${(landlordHours / WORKDAY_HOURS).toFixed(2)} full workdays</strong> ` +
-      `to the landlord and <strong>${(taxHours / WORKDAY_HOURS).toFixed(2)}</strong> to the government.`;
+      `That's <strong>${r.daysRent.toFixed(2)} eight-hour days</strong>` +
+      (showBothColumns
+        ? ` (or <strong>${r.shiftsRent.toFixed(2)} ${shiftLength}-hour shifts</strong>)`
+        : "") +
+      ` to the landlord, versus <strong>${r.daysTaxes.toFixed(2)}</strong> eight-hour days` +
+      (showBothColumns
+        ? ` (or <strong>${r.shiftsTaxes.toFixed(2)}</strong> ${shiftLength}-hour shifts)`
+        : "") +
+      ` to taxes.`;
   } else {
     narration =
-    //   `This person works <strong>${landlordHours.toFixed(1)} hours</strong> per month for their landlord, ` +
-    //   `<strong>${taxHours.toFixed(1)} hours</strong> for taxes, and keeps <strong>${selfHours.toFixed(1)} hours</strong> ` +
-    //   `for themselves. At ${SHIFT_HOURS}-hour shifts, that's ` +
-    //   `<strong>${(landlordHours / SHIFT_HOURS).toFixed(2)}</strong> shifts for the landlord and ` +
-    //   `<strong>${(taxHours / SHIFT_HOURS).toFixed(2)}</strong> for taxes.`;
       `This person works <strong>${landlordHours.toFixed(1)} hours</strong> per month for their landlord, ` +
       `<strong>${taxHours.toFixed(1)} hours</strong> for taxes, and keeps <strong>${selfHours.toFixed(1)} hours</strong> ` +
-      `for themselves. For ${WORKDAY_HOURS}-hour workdays, that's ` +
-      `<strong>${(landlordHours / WORKDAY_HOURS).toFixed(2)}</strong> workdays for the landlord and ` +
-      `<strong>${(taxHours / WORKDAY_HOURS).toFixed(2)}</strong> for taxes.`;
+      `for themselves. In eight-hour days that's <strong>${r.daysRent.toFixed(2)}</strong> for the landlord and ` +
+      `<strong>${r.daysTaxes.toFixed(2)}</strong> for taxes` +
+      (showBothColumns
+        ? `; in ${shiftLength}-hour shifts it's <strong>${r.shiftsRent.toFixed(2)}</strong> and <strong>${r.shiftsTaxes.toFixed(2)}</strong>.`
+        : `.`);
   }
   $("narration").innerHTML = narration;
 
-  // --- Show results ---
   $("results").style.display = "block";
   $("results").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
-// Reset button
 $("reset-btn").addEventListener("click", () => {
   $("input-form").reset();
   $("salary_type").value = "hourly";
@@ -715,6 +783,9 @@ $("reset-btn").addEventListener("click", () => {
   $("salary").value = "26";
   $("hours_per_week").value = "40";
   $("weeks_per_year").value = "52";
+  $("shift_length").value = "12";
+  $("custom-shift-wrap").style.display = "none";
+  $("custom_shift").value = "12";
   $("monthly_rent").value = "1700";
   $("dependents").value = "1";
   $("filing_status").value = "single";
@@ -722,8 +793,6 @@ $("reset-btn").addEventListener("click", () => {
   clearError();
   $("results").style.display = "none";
 });
-
 </script>
-
 </body>
 </html>
