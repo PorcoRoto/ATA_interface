@@ -291,7 +291,7 @@
 <body>
 <div class="wrap">
   <h1>Work-Burden Analysis</h1>
-  <p class="subtitle">See how many hours of your labor go to taxes, to your landlord (or lender), and to yourself.</p>
+  <p class="subtitle">See how many hours of your labor go to taxes, to your landlord, and to yourself.</p>
 
   <div class="card">
     <form id="input-form" novalidate>
@@ -337,7 +337,7 @@
         </div>
 
         <div>
-          <label for="monthly_rent">Monthly rent / mortgage interest ($)</label>
+          <label for="monthly_rent">Monthly rent ($)</label>
           <input type="number" id="monthly_rent" step="1" min="0" value="1700" required />
         </div>
 
@@ -415,17 +415,13 @@
       <span class="remain" id="bar-remain">—</span>
     </div>
     <div class="legend">
-      <span class="rent"><span class="dot"></span>Rent / interest</span>
+      <span class="rent"><span class="dot"></span>Rent</span>
       <span class="tax"><span class="dot"></span>Taxes</span>
       <span class="remain"><span class="dot"></span>Remainder</span>
     </div>
 
     <div class="narration" id="narration"></div>
   </div>
-  <footer class="footer">
-    <p>Made by neighbors, for neighbors. Share freely.</p>
-    <p><a href="index.html">← Back to the zine</a></p>
-  </footer>
 </div>
 
 <script>
@@ -682,13 +678,9 @@ $("input-form").addEventListener("submit", (e) => {
   $("out-hours").textContent = r.monthlyHours.toFixed(1) + " hrs";
 
   // --- Decide whether to show both columns ---
-  // If the chosen shift length equals 8, the two columns would be identical,
-  // so hide the "8-hr days" column and use "shifts" only.
   const showBothColumns = Math.abs(shiftLength - EIGHT_HOUR_DAY) > 0.001;
-  const shiftHeader = $("shift-col-header");
   const headRow = $("table-head-row");
 
-  // Rebuild header to toggle the 8-hr column
   headRow.innerHTML = showBothColumns
     ? `<th>Obligation</th>
        <th>Monthly $</th>
@@ -706,7 +698,7 @@ $("input-form").addEventListener("submit", (e) => {
     ["Federal income tax", r.monthlyFederal, r.monthlyFederal / r.hourlyWage, r.daysFederal, r.shiftsFederal],
     ["State income tax", r.monthlyState, r.monthlyState / r.hourlyWage, r.daysState, r.shiftsState],
     ["Total taxes", r.monthlyTaxTotal, r.hoursTaxes, r.daysTaxes, r.shiftsTaxes, true],
-    ["Rent / mortgage interest", r.monthlyRent, r.hoursRent, r.daysRent, r.shiftsRent],
+    ["Rent", r.monthlyRent, r.hoursRent, r.daysRent, r.shiftsRent],
     ["Remainder", r.monthlyRemainder, r.hoursRemainder, r.daysRemainder, r.shiftsRemainder, true],
   ];
 
