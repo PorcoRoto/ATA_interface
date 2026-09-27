@@ -150,6 +150,56 @@
   .accent-tax { color: var(--tax); font-weight: 700; }
   .accent-remain { color: var(--remain); font-weight: 700; }
 
+
+    /* ---------- Source note (linked reference) ---------- */
+  .source-note {
+    background: linear-gradient(160deg, rgba(56,189,248,0.08), rgba(34,211,238,0.04));
+    border: 1px solid rgba(56,189,248,0.35);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    font-size: 0.9rem;
+  }
+
+  .source-note-title {
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+  }
+
+  .source-note-icon {
+    margin-right: 0.35rem;
+  }
+
+  .source-note-body {
+    margin: 0 0 0.75rem;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .source-note-body strong {
+    color: #fff;
+  }
+
+  .source-note-link {
+    margin: 0;
+    font-size: 0.85rem;
+  }
+
+  .source-note-link a {
+    color: var(--accent-2);
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(34,211,238,0.5);
+    padding-bottom: 1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .source-note-link a:hover {
+    color: #fff;
+    border-bottom-color: #fff;
+  }
   /* ---------- Pull quote ---------- */
   .pullquote {
     font-size: 1.15rem;
@@ -313,7 +363,29 @@
     </div>
 
     <p>That's kind of frustrating to think about, especially when I know that the CEO of the hospital pays almost none.</p>
-    <p class="aside">(Need to cite an example of this.)</p>
+    <!-- Replace the placeholder aside in Panel 3 with this -->
+    <aside class="source-note">
+      <p class="source-note-title">
+        <span class="source-note-icon">📎</span>
+        About those hospital CEOs…
+      </p>
+      <p class="source-note-body">
+        In 2023, the CEO of NYU Langone Health — a <em>nonprofit</em> hospital that pays no income tax —
+        took home about <strong>$22.8 million</strong> in total compensation.
+        The average registered nurse at the same hospital made around <strong>$93,000</strong>.
+        Research on nonprofit hospitals found CEO pay climbed over <strong>30 percent</strong> during the 2010s,
+        while staff nurse wages grew only a few percent over the same period.
+      </p>
+      <p class="source-note-link">
+        <a href="https://maninamerica.substack.com/p/nonprofit-hospital-ceo-paid-23-million" target="_blank" rel="noopener noreferrer">
+          Read the full investigation: "YOU Paid $23 MILLION to this Nonprofit Hospital CEO" →
+        </a><br>
+        <a href="https://www.propublica.org/article/billionaires-net-investment-income-tax" target="_blank" rel="noopener noreferrer">
+          And check out ProPublica's explainer on ways the wealthy pay less in taxes than you: "How Billionaires Have Sidestepped a Tax Aimed at the Rich" →
+        </a>
+      </p>
+    </aside>
+    <!-- <p class="aside">(Need to cite an example of this.)</p> -->
   </section>
 
   <!-- ============ PANEL 4 ============ -->

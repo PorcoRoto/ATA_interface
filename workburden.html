@@ -419,6 +419,7 @@
       <p>Made by neighbors, for neighbors. Share freely.</p>
       <p><a href="index.html">← Back to the zine</a></p>
     </footer>
+  </div>
 </div>
   
 
@@ -621,8 +622,7 @@ $("input-form").addEventListener("submit", (e) => {
   const monthlyRent = parseFloat($("monthly_rent").value);
   const dependents = parseInt($("dependents").value, 10);
   const filingStatus = $("filing_status").value;
-  const stateRaw = $("state_tax_rate").value.trim();
-  const stateTaxRate = stateRaw === "" ? null : parseFloat(stateRaw);
+  const stateTaxRate = null;
 
   // Resolve shift length
   const shiftChoice = $("shift_length").value;
@@ -783,7 +783,6 @@ $("reset-btn").addEventListener("click", () => {
   $("monthly_rent").value = "1700";
   $("dependents").value = "1";
   $("filing_status").value = "single";
-  $("state_tax_rate").value = "";
   clearError();
   $("results").style.display = "none";
 });
