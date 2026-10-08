@@ -213,6 +213,8 @@
     border-bottom: none;
   }
 
+  
+
   /* ---------- Pie chart ---------- */
   .chart-wrap {
     display: flex;
@@ -226,7 +228,7 @@
     height: auto;
   }
 
-  .narration {
+  /* .narration {
     margin-top: 1.25rem;
     padding: 0.9rem 1rem;
     border-left: 3px solid var(--accent);
@@ -235,6 +237,70 @@
     font-style: italic;
     color: var(--text);
     font-size: 0.92rem;
+  } */
+
+    /* ---------- Total rent callout ---------- */
+  .total-rent {
+    margin: 1.5rem 0 1rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(160deg, rgba(249,115,22,0.12), rgba(249,115,22,0.04));
+    border: 1px solid rgba(249,115,22,0.45);
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .total-rent-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+  }
+
+  .total-rent-value {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    font-weight: 800;
+    color: var(--rent);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .total-rent-sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+  }
+
+  /* ---------- Upgraded narration ---------- */
+  .narration {
+    margin-top: 1.5rem;
+    padding: 1.5rem 1.75rem;
+    border-left: 4px solid var(--accent);
+    background: linear-gradient(135deg, rgba(56,189,248,0.10), rgba(34,211,238,0.04));
+    border-radius: 0 12px 12px 0;
+    font-style: normal;
+    color: var(--text);
+    font-size: 1.15rem;
+    line-height: 1.6;
+  }
+
+  .narration strong {
+    color: var(--accent-2);
+    font-weight: 700;
+  }
+
+  .narration .lede {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 620px) {
+    .narration { font-size: 1.05rem; padding: 1.25rem 1.25rem; }
   }
 
   .error {
@@ -322,7 +388,17 @@
           <label for="monthly_rent">Monthly rent ($)</label>
           <input type="number" id="monthly_rent" step="10" min="0" value="1700" required />
         </div>
+                <div>
+          <label for="tenure_years">Years with current landlord</label>
+          <input type="number" id="tenure_years" step="1" min="0" max="80" value="7" />
+        </div>
+
+        <div>
+          <label for="tenure_months">Additional months <span class="hint">(0–11)</span></label>
+          <input type="number" id="tenure_months" step="1" min="0" max="11" value="0" />
+        </div>
       </div>
+
 
       <div class="actions">
         <button type="submit" class="primary">Run analysis</button>
@@ -365,6 +441,12 @@
       </thead>
       <tbody id="table-body"></tbody>
     </table>
+
+    <div class="total-rent" id="total-rent-box">
+      <div class="total-rent-label">Total paid to your landlord</div>
+      <div class="total-rent-value" id="out-total-rent">—</div>
+      <div class="total-rent-sub" id="out-total-rent-sub">—</div>
+    </div>
 
     <div class="chart-wrap">
       <canvas id="pie-chart" width="900" role="img" aria-label="Pie chart showing the share of your paycheck that goes to rent versus everything else"></canvas>
@@ -601,6 +683,10 @@ $("input-form").addEventListener("submit", (e) => {
   const hoursPerWeek = parseFloat($("hours_per_week").value);
   const weeksPerYear = parseFloat($("weeks_per_year").value);
   const monthlyRent = parseFloat($("monthly_rent").value);
+  const tenureYearsRaw = $("tenure_years").value.trim();
+  const tenureMonthsRaw = $("tenure_months").value.trim();
+  const tenureYears = tenureYearsRaw === "" ? 0 : parseInt(tenureYearsRaw, 10);
+  const tenureMonths = tenureMonthsRaw === "" ? 0 : parseInt(tenureMonthsRaw, 10);
 
   const shiftChoice = $("shift_length").value;
   const shiftLength =
@@ -620,6 +706,9 @@ $("input-form").addEventListener("submit", (e) => {
   if (errors.length) {
     showError(errors.join(" "));
     return;
+  if (!Number.isInteger(tenureYears) || tenureYears < 0) errors.push("Years with landlord must be a non-negative whole number.");
+  if (!Number.isInteger(tenureMonths) || tenureMonths < 0 || tenureMonths > 11)
+    errors.push("Additional months must be between 0 and 11.");
   }
 
   const r = analyzeRentBurden({
@@ -634,6 +723,9 @@ $("input-form").addEventListener("submit", (e) => {
   // --- Percentage of paycheck going to rent ---
   const rentPct = r.monthlyGross > 0 ? (r.monthlyRent / r.monthlyGross) * 100 : 0;
   const remainPct = 100 - rentPct;
+    // --- Total rent paid over tenure ---
+  const totalMonths = tenureYears * 12 + tenureMonths;
+  const totalRentPaid = r.monthlyRent * totalMonths;
 
   // --- Summary ---
   $("tag-summary").textContent =
@@ -643,6 +735,16 @@ $("input-form").addEventListener("submit", (e) => {
   $("out-pct").textContent = rentPct.toFixed(1) + "%";
   const payPerWorkDay = r.hourlyWage * shiftLength;
   $("out-perday").textContent = fmtMoney(payPerWorkDay);
+
+  const totalBox = $("total-rent-box");
+  if (totalMonths > 0) {
+    $("out-total-rent").textContent = fmtMoneyShort(totalRentPaid);
+    $("out-total-rent-sub").textContent =
+      totalMonths + " months at " + fmtMoneyShort(r.monthlyRent) + "/month";
+    totalBox.style.display = "block";
+  } else {
+    totalBox.style.display = "none";
+  }
 
     // --- Update the work-day column header ---
   $("shift-col-header").textContent = `${shiftLength}-hr work days`;
@@ -713,21 +815,46 @@ $("input-form").addEventListener("submit", (e) => {
   ]);
 
   // --- Narration ---
+  const tenurePhrase = totalMonths > 0
+    ? ` Over <strong>${totalMonths} months</strong>, that adds up to ` +
+      `<strong>${fmtMoneyShort(totalRentPaid)}</strong> handed to their landlord — ` +
+      `money that built someone else's equity, not their own.`
+    : "";
+
   let narration = "";
   if (rentPct >= 50) {
     narration =
+      `<span class="lede">What this means</span>` +
       `This person hands over <strong>${rentPct.toFixed(1)}%</strong> of every paycheck to their landlord — ` +
       `more than half of their working life. That's <strong>${r.hoursRent.toFixed(1)} hours</strong> per month ` +
       `(or <strong>${r.shiftsRent.toFixed(2)}</strong> ${shiftLength}-hour work days) spent working for the landlord, ` +
-      `versus <strong>${r.hoursRemainder.toFixed(1)} hours</strong> for everything else.`;
+      `versus <strong>${r.hoursRemainder.toFixed(1)} hours</strong> for everything else.` +
+      tenurePhrase;
   } else {
     narration =
+      `<span class="lede">What this means</span>` +
       `This person hands over <strong>${rentPct.toFixed(1)}%</strong> of every paycheck to their landlord. ` +
       `That's <strong>${r.hoursRent.toFixed(1)} hours</strong> per month ` +
       `(or <strong>${r.shiftsRent.toFixed(2)}</strong> ${shiftLength}-hour work days) spent working for the landlord, ` +
-      `versus <strong>${r.hoursRemainder.toFixed(1)} hours</strong> for everything else.`;
+      `versus <strong>${r.hoursRemainder.toFixed(1)} hours</strong> for everything else.` +
+      tenurePhrase;
   }
   $("narration").innerHTML = narration;
+  // let narration = "";
+  // if (rentPct >= 50) {
+  //   narration =
+  //     `This person hands over <strong>${rentPct.toFixed(1)}%</strong> of every paycheck to their landlord — ` +
+  //     `more than half of their working life. That's <strong>${r.hoursRent.toFixed(1)} hours</strong> per month ` +
+  //     `(or <strong>${r.shiftsRent.toFixed(2)}</strong> ${shiftLength}-hour work days) spent working for the landlord, ` +
+  //     `versus <strong>${r.hoursRemainder.toFixed(1)} hours</strong> for everything else.`;
+  // } else {
+  //   narration =
+  //     `This person hands over <strong>${rentPct.toFixed(1)}%</strong> of every paycheck to their landlord. ` +
+  //     `That's <strong>${r.hoursRent.toFixed(1)} hours</strong> per month ` +
+  //     `(or <strong>${r.shiftsRent.toFixed(2)}</strong> ${shiftLength}-hour work days) spent working for the landlord, ` +
+  //     `versus <strong>${r.hoursRemainder.toFixed(1)} hours</strong> for everything else.`;
+  // }
+  // $("narration").innerHTML = narration;
 
   $("results").style.display = "block";
   $("results").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -746,6 +873,8 @@ $("reset-btn").addEventListener("click", () => {
   $("monthly_rent").value = "1700";
   clearError();
   $("results").style.display = "none";
+  $("tenure_years").value = "7";
+  $("tenure_months").value = "0";
 });
 </script>
 </body>
