@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rent-Burden Analysis</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card-2: #273449;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-2: #22d3ee;
+    --rent: #f97316;
+    --remain: #34d399;
+    --border: #334155;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at top, #1e293b 0%, #0f172a 60%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    line-height: 1.5;
+  }
+
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+    margin: 0 0 0.25rem;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    margin: 0 0 2rem;
+    font-size: 0.95rem;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--text);
+  }
+
+  .hint {
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(56,189,248,0.15);
+  }
+
+  .actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  button {
+    padding: 0.7rem 1.25rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.05s, filter 0.15s;
+  }
+
+  button:active { transform: translateY(1px); }
+
+  .primary {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #0f172a;
+  }
+
+  .primary:hover { filter: brightness(1.08); }
+
+  .secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .secondary:hover { color: var(--text); border-color: var(--muted); }
+
+  #results { display: none; }
+
+  .results-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .results-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--card-2);
+    color: var(--muted);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .stat {
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 0.9rem;
+  }
+
+  .stat .label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+
+  .stat .value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 0.15rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  th, td {
+    text-align: right;
+    padding: 0.55rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th:first-child, td:first-child { text-align: left; }
+
+  th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  tr.total td {
+    font-weight: 700;
+    border-top: 2px solid var(--border);
+    border-bottom: none;
+  }
+
+  /* ---------- Pie chart ---------- */
+  .chart-wrap {
+    display: flex;
+    justify-content: center;
+    margin: 1.5rem 0 1rem;
+  }
+
+    #pie-chart {
+    max-width: 820px;
+    width: 100%;
+    height: auto;
+  }
+
+  .narration {
+    margin-top: 1.25rem;
+    padding: 0.9rem 1rem;
+    border-left: 3px solid var(--accent);
+    background: rgba(56,189,248,0.06);
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: var(--text);
+    font-size: 0.92rem;
+  }
+
+  .error {
+    background: rgba(248,113,113,0.1);
+    border: 1px solid #f87171;
+    color: #fecaca;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    display: none;
+  }
+
+  footer.footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  footer.footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  footer.footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 620px) {
+    table { font-size: 0.82rem; }
+    th, td { padding: 0.45rem 0.3rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Rent-Burden Analysis</h1>
+  <p class="subtitle">See how much of your paycheck goes to your landlord — and how much is left for everything else.</p>
+
+  <div class="card">
+    <form id="input-form" novalidate>
+      <div class="grid">
+        <div>
+          <label for="salary_type">Salary type</label>
+          <select id="salary_type">
+            <option value="hourly" selected>Hourly</option>
+            <option value="annual">Annual</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="salary">
+            <span id="salary-label-text">Hourly wage ($)</span>
+          </label>
+          <input type="number" id="salary" step="0.01" min="0" value="26" required />
+        </div>
+
+        <div>
+          <label for="hours_per_week">Hours per week <span class="hint">(e.g., 40)</span></label>
+          <input type="number" id="hours_per_week" step="0.5" min="1" value="40" required />
+        </div>
+
+        <div>
+          <label for="weeks_per_year">Weeks per year <span class="hint">(52 = full year)</span></label>
+          <input type="number" id="weeks_per_year" step="1" min="1" max="52" value="52" required />
+        </div>
+
+        <div>
+          <label for="shift_length">Shift length <span class="hint">(used in results table)</span></label>
+          <select id="shift_length">
+            <option value="8">8 hours</option>
+            <option value="10">10 hours</option>
+            <option value="12" selected>12 hours</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </div>
+
+        <div id="custom-shift-wrap" style="display:none;">
+          <label for="custom_shift">Custom shift length (hours)</label>
+          <input type="number" id="custom_shift" step="0.5" min="1" max="24" value="12" />
+        </div>
+
+        <div>
+          <label for="monthly_rent">Monthly rent ($)</label>
+          <input type="number" id="monthly_rent" step="10" min="0" value="1700" required />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="primary">Run analysis</button>
+        <button type="button" class="secondary" id="reset-btn">Reset</button>
+      </div>
+
+      <div class="error" id="error-box"></div>
+    </form>
+  </div>
+
+  <div class="card" id="results">
+    <div class="results-header">
+      <h2>Results</h2>
+      <span class="tag" id="tag-summary">—</span>
+    </div>
+
+    <div class="summary">
+      <div class="stat">
+        <div class="label">Monthly Pay</div>
+        <div class="value" id="out-monthly">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">Pay per work day</div>
+        <div class="value" id="out-perday">—</div>
+      </div>
+      <div class="stat">
+        <div class="label">Rent as % of pay</div>
+        <div class="value" id="out-pct">—</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Obligation</th>
+          <th>Monthly $</th>
+          <th>Hours</th>
+          <th id="shift-col-header">12-hr work days</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+
+    <div class="chart-wrap">
+      <canvas id="pie-chart" width="900" role="img" aria-label="Pie chart showing the share of your paycheck that goes to rent versus everything else"></canvas>
+      <!-- <canvas id="pie-chart" width="620" height="360" role="img" aria-label="Pie chart showing the share of your paycheck that goes to rent versus everything else"></canvas> -->
+    </div>
+
+    <div class="narration" id="narration"></div>
+  </div>
+
+  <footer class="footer">
+    <p>Made by neighbors, for neighbors. Share freely.</p>
+    <p><a href="index.html">← Back to the zine</a></p>
+  </footer>
+</div>
+
+<script>
+/* =========================================================
+   Core analysis function — rent only
+   ========================================================= */
+const EIGHT_HOUR_DAY = 8;
+
+function analyzeRentBurden({
+  salary,
+  salaryType = "hourly",
+  hoursPerWeek = 40,
+  weeksPerYear = 52,
+  monthlyRent = 0,
+  shiftLength = 12,
+}) {
+  // --- 1. Normalize to hourly wage and annual gross ---
+  let annualGross, hourlyWage;
+  if (salaryType === "annual") {
+    annualGross = salary;
+    const totalHours = hoursPerWeek * weeksPerYear;
+    hourlyWage = totalHours ? annualGross / totalHours : 0;
+  } else {
+    hourlyWage = salary;
+    annualGross = hourlyWage * hoursPerWeek * weeksPerYear;
+  }
+
+  const monthlyGross = annualGross / 12;
+  const monthlyHours = (hoursPerWeek * weeksPerYear) / 12;
+  
+
+  // --- 2. The two buckets: rent and everything else ---
+  const monthlyRemainder = monthlyGross - monthlyRent;
+
+  // --- 3. Convert to hours, 8-hr days, and chosen shifts ---
+  const hoursFor = (cost) => (hourlyWage ? cost / hourlyWage : Infinity);
+  const hoursRent = hoursFor(monthlyRent);
+  const hoursRemainder = hoursFor(monthlyRemainder);
+
+  return {
+    hourlyWage,
+    annualGross,
+    monthlyGross,
+    monthlyHours,
+    shiftLength,
+    monthlyRent,
+    monthlyRemainder,
+    hoursRent,
+    hoursRemainder,
+    daysRent: hoursRent / EIGHT_HOUR_DAY,
+    daysRemainder: hoursRemainder / EIGHT_HOUR_DAY,
+    shiftsRent: hoursRent / shiftLength,
+    shiftsRemainder: hoursRemainder / shiftLength,
+  };
+}
+
+/* =========================================================
+   UI logic
+   ========================================================= */
+const $ = (id) => document.getElementById(id);
+
+const fmtMoney = (n) =>
+  "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const fmtMoneyShort = (n) =>
+  "$" + Math.round(n).toLocaleString("en-US");
+
+const fmtHours = (n) =>
+  (isFinite(n) ? n.toFixed(1) : "∞");
+
+const fmtDays = (n) =>
+  (isFinite(n) ? n.toFixed(2) : "∞");
+
+const fmtShifts = (n) =>
+  (isFinite(n) ? n.toFixed(2) : "∞");
+
+$("salary_type").addEventListener("change", (e) => {
+  const isHourly = e.target.value === "hourly";
+  $("salary-label-text").textContent = isHourly ? "Hourly wage ($)" : "Annual salary ($)";
+  $("salary").value = isHourly ? "26" : "54080";
+});
+
+$("shift_length").addEventListener("change", (e) => {
+  const isCustom = e.target.value === "custom";
+  $("custom-shift-wrap").style.display = isCustom ? "block" : "none";
+});
+
+function showError(msg) {
+  const box = $("error-box");
+  box.textContent = msg;
+  box.style.display = "block";
+}
+
+function clearError() {
+  const box = $("error-box");
+  box.textContent = "";
+  box.style.display = "none";
+}
+
+/* ---------- Pie chart drawing (no libraries) ---------- */
+
+function drawPie(canvas, segments) {
+//   const ctx = canvas.getContext("2d");
+//   const W = 620;
+//   const H = 360;
+//   const cx = W / 2;
+//   const cy = H / 2;
+//   const radius = Math.min(W, H) / 2 - 20;
+  const ctx = canvas.getContext("2d");
+  const W = canvas.clientWidth || 820;
+  const H = Math.round(W * 0.45);  // maintain a pleasing aspect ratio
+  const cx = W / 2;
+  const cy = H / 2;
+  const radius = Math.min(W, H) / 2 - 24;
+
+  // Hi-DPI scaling
+  const dpr = window.devicePixelRatio || 1;
+  if (canvas.dataset.dpr !== String(dpr)) {
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    canvas.dataset.dpr = String(dpr);
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  const total = segments.reduce((sum, s) => sum + Math.max(0, s.value), 0);
+
+  // Empty state
+  if (total <= 0) {
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fillStyle = "#273449";
+    ctx.fill();
+    return;
+  }
+
+  // Draw slices counterclockwise starting at 12 o'clock
+  let startAngle = -Math.PI / 2;
+  const sliceAngles = [];
+
+  segments.forEach((seg) => {
+    const value = Math.max(0, seg.value);
+    if (value === 0) {
+      sliceAngles.push(null);
+      return;
+    }
+    const slice = (value / total) * Math.PI * 2;
+    const endAngle = startAngle - slice;  // subtract => counterclockwise
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, startAngle, endAngle, true); // anticlockwise = true
+    ctx.closePath();
+    ctx.fillStyle = seg.color;
+    ctx.fill();
+
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#1e293b";
+    ctx.stroke();
+
+    const midAngle = startAngle - slice / 2;
+    sliceAngles.push(midAngle);
+    startAngle = endAngle;
+  });
+
+  // Donut hole
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 0.5, 0, Math.PI * 2);
+  ctx.fillStyle = "#1e293b";
+  ctx.fill();
+
+  // Leader lines + labels
+  const labelRadius = radius + 14;
+  const elbowRadius = radius + 28;
+  const textPad = 6;
+
+  segments.forEach((seg, i) => {
+    const mid = sliceAngles[i];
+    if (mid === null || mid === undefined) return;
+
+    const cos = Math.cos(mid);
+    const sin = Math.sin(mid);
+
+    const x1 = cx + cos * labelRadius;
+    const y1 = cy + sin * labelRadius;
+    const x2 = cx + cos * elbowRadius;
+    const y2 = cy + sin * elbowRadius;
+
+    const isRight = cos >= 0;
+    const x3 = x2 + (isRight ? 28 : -28);
+    const y3 = y2;
+
+    // Leader line
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineTo(x3, y3);
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = seg.color;
+    ctx.stroke();
+
+    // Text
+    ctx.font = "600 18px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillStyle = seg.color;
+    ctx.textAlign = isRight ? "left" : "right";
+    ctx.textBaseline = "middle";
+
+    const pct = ((Math.max(0, seg.value) / total) * 100).toFixed(0);
+    ctx.fillText(seg.label + " " + pct + "%", x3 + (isRight ? textPad : -textPad), y3);
+  });
+}
+
+$("input-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  clearError();
+
+  const salaryType = $("salary_type").value;
+  const salary = parseFloat($("salary").value);
+  const hoursPerWeek = parseFloat($("hours_per_week").value);
+  const weeksPerYear = parseFloat($("weeks_per_year").value);
+  const monthlyRent = parseFloat($("monthly_rent").value);
+
+  const shiftChoice = $("shift_length").value;
+  const shiftLength =
+    shiftChoice === "custom"
+      ? parseFloat($("custom_shift").value)
+      : parseFloat(shiftChoice);
+
+  const errors = [];
+  if (!isFinite(salary) || salary < 0) errors.push("Salary must be a non-negative number.");
+  if (!isFinite(hoursPerWeek) || hoursPerWeek <= 0) errors.push("Hours per week must be greater than 0.");
+  if (!isFinite(weeksPerYear) || weeksPerYear <= 0 || weeksPerYear > 52)
+    errors.push("Weeks per year must be between 1 and 52.");
+  if (!isFinite(monthlyRent) || monthlyRent < 0) errors.push("Rent must be a non-negative number.");
+  if (!isFinite(shiftLength) || shiftLength <= 0 || shiftLength > 24)
+    errors.push("Shift length must be between 0 and 24 hours.");
+
+  if (errors.length) {
+    showError(errors.join(" "));
+    return;
+  }
+
+  const r = analyzeRentBurden({
+    salary,
+    salaryType,
+    hoursPerWeek,
+    weeksPerYear,
+    monthlyRent,
+    shiftLength,
+  });
+
+  // --- Percentage of paycheck going to rent ---
+  const rentPct = r.monthlyGross > 0 ? (r.monthlyRent / r.monthlyGross) * 100 : 0;
+  const remainPct = 100 - rentPct;
+
+  // --- Summary ---
+  $("tag-summary").textContent =
+    rentPct.toFixed(0) + "% to rent · " + shiftLength + "-hr work days";
+
+  $("out-monthly").textContent = fmtMoneyShort(r.monthlyGross);
+  $("out-pct").textContent = rentPct.toFixed(1) + "%";
+  const payPerWorkDay = r.hourlyWage * shiftLength;
+  $("out-perday").textContent = fmtMoney(payPerWorkDay);
+
+    // --- Update the work-day column header ---
+  $("shift-col-header").textContent = `${shiftLength}-hr work days`;
+//   // --- Decide whether to show both time columns ---
+//   const showBothColumns = Math.abs(shiftLength - EIGHT_HOUR_DAY) > 0.001;
+//   const headRow = $("table-head-row");
+
+//   headRow.innerHTML = showBothColumns
+//     ? `<th>Obligation</th>
+//        <th>Monthly $</th>
+//        <th>Hours</th>
+//        <th>8-hr days</th>
+//        <th>${shiftLength}-hr shifts</th>`
+//     : `<th>Obligation</th>
+//        <th>Monthly $</th>
+//        <th>Hours</th>
+//        <th>${shiftLength}-hr shifts</th>`;
+
+  const rows = [
+    ["Rent (landlord)", r.monthlyRent, r.hoursRent, r.shiftsRent],
+    ["Everything else", r.monthlyRemainder, r.hoursRemainder, r.shiftsRemainder, true],
+  ];
+
+  const tbody = $("table-body");
+  tbody.innerHTML = "";
+  for (const [label, cost, hrs, shifts, isTotal] of rows) {
+    const tr = document.createElement("tr");
+    if (isTotal) tr.classList.add("total");
+    tr.innerHTML =
+      `<td>${label}</td>` +
+      `<td>${fmtMoney(cost)}</td>` +
+      `<td>${fmtHours(hrs)}</td>` +
+      `<td>${fmtShifts(shifts)}</td>`;
+    tbody.appendChild(tr);
+  }
+//   const rows = [
+//     ["Rent (landlord)", r.monthlyRent, r.hoursRent, r.daysRent, r.shiftsRent],
+//     ["Everything else", r.monthlyRemainder, r.hoursRemainder, r.daysRemainder, r.shiftsRemainder, true],
+//   ];
+
+//   const tbody = $("table-body");
+//   tbody.innerHTML = "";
+//   for (const [label, cost, hrs, days, shifts, isTotal] of rows) {
+//     const tr = document.createElement("tr");
+//     if (isTotal) tr.classList.add("total");
+
+//     const cells = [
+//       `<td>${label}</td>`,
+//       `<td>${fmtMoney(cost)}</td>`,
+//       `<td>${fmtHours(hrs)}</td>`,
+//     ];
+//     if (showBothColumns) {
+//       cells.push(`<td>${fmtDays(days)}</td>`);
+//     }
+//     cells.push(`<td>${fmtShifts(shifts)}</td>`);
+
+//     tr.innerHTML = cells.join("");
+//     tbody.appendChild(tr);
+//   }
+
+  // --- Pie chart ---
+  const rentColor = getComputedStyle(document.documentElement).getPropertyValue("--rent").trim() || "#f97316";
+  const remainColor = getComputedStyle(document.documentElement).getPropertyValue("--remain").trim() || "#34d399";
+
+  drawPie($("pie-chart"), [
+    { value: Math.max(0, r.monthlyRent),     color: rentColor,   label: "Rent" },
+    { value: Math.max(0, r.monthlyRemainder), color: remainColor, label: "Everything else" },
+  ]);
+
+  // --- Narration ---
+  let narration = "";
+  if (rentPct >= 50) {
+    narration =
+      `This person hands over <strong>${rentPct.toFixed(1)}%</strong> of every paycheck to their landlord — ` +
+      `more than half of their working life. That's <strong>${r.hoursRent.toFixed(1)} hours</strong> per month ` +
+      `(or <strong>${r.shiftsRent.toFixed(2)}</strong> ${shiftLength}-hour work days) spent working for the landlord, ` +
+      `versus <strong>${r.hoursRemainder.toFixed(1)} hours</strong> for everything else.`;
+  } else {
+    narration =
+      `This person hands over <strong>${rentPct.toFixed(1)}%</strong> of every paycheck to their landlord. ` +
+      `That's <strong>${r.hoursRent.toFixed(1)} hours</strong> per month ` +
+      `(or <strong>${r.shiftsRent.toFixed(2)}</strong> ${shiftLength}-hour work days) spent working for the landlord, ` +
+      `versus <strong>${r.hoursRemainder.toFixed(1)} hours</strong> for everything else.`;
+  }
+  $("narration").innerHTML = narration;
+
+  $("results").style.display = "block";
+  $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+$("reset-btn").addEventListener("click", () => {
+  $("input-form").reset();
+  $("salary_type").value = "hourly";
+  $("salary-label-text").textContent = "Hourly wage ($)";
+  $("salary").value = "26";
+  $("hours_per_week").value = "40";
+  $("weeks_per_year").value = "52";
+  $("shift_length").value = "12";
+  $("custom-shift-wrap").style.display = "none";
+  $("custom_shift").value = "12";
+  $("monthly_rent").value = "1700";
+  clearError();
+  $("results").style.display = "none";
+});
+</script>
+</body>
+</html>
