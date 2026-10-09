@@ -6,28 +6,35 @@
 <title>Rent-Burden Analysis</title>
 <style>
   :root {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --card-2: #273449;
-    --text: #e2e8f0;
-    --muted: #94a3b8;
-    --accent: #38bdf8;
-    --accent-2: #22d3ee;
-    --rent: #f97316;
-    --remain: #34d399;
-    --border: #334155;
+    --paper: #f5f1e8;
+    --paper-2: #ebe5d8;
+    --card: #faf7f0;
+    --ink: #111111;
+    --ink-soft: #2b2b2b;
+    --muted: #5a5a5a;
+    --accent: #c2410c;       /* dark orange */
+    --accent-2: #9a3412;     /* deeper orange */
+    --accent-soft: #f4d9c4;  /* pale orange wash */
+    --rent: #c2410c;         /* rent slice — dark orange */
+    --remain: #2b2b2b;       /* remainder slice — ink black */
+    --border: #111111;
+    --border-soft: #c9c2b2;
+    --shadow: rgba(17,17,17,0.18);
   }
 
   * { box-sizing: border-box; }
 
   body {
     margin: 0;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(circle at top, #1e293b 0%, #0f172a 60%);
-    color: var(--text);
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    background: var(--paper);
+    color: var(--ink);
     min-height: 100vh;
-    padding: 2rem 1rem;
-    line-height: 1.5;
+    padding: 2rem 1rem 4rem;
+    line-height: 1.6;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(0,0,0,0.025) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(0,0,0,0.03) 0%, transparent 45%);
   }
 
   .wrap {
@@ -36,27 +43,33 @@
   }
 
   h1 {
-    font-size: 1.75rem;
-    margin: 0 0 0.25rem;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    font-size: clamp(1.75rem, 5vw, 2.25rem);
+    margin: 0 0 0.35rem;
+    color: var(--ink);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
   }
 
   .subtitle {
     color: var(--muted);
     margin: 0 0 2rem;
-    font-size: 0.95rem;
+    font-size: 1rem;
+    font-style: italic;
   }
 
   .card {
     background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    border: 2px solid var(--ink);
+    border-radius: 2px;
+    padding: 1.65rem 1.5rem 1.5rem;
+    margin-bottom: 1.75rem;
+    box-shadow: 6px 6px 0 var(--ink);
   }
 
   .grid {
@@ -67,68 +80,79 @@
 
   label {
     display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 0.35rem;
-    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+    color: var(--ink);
   }
 
   .hint {
     font-weight: 400;
     color: var(--muted);
-    font-size: 0.78rem;
+    font-size: 0.75rem;
+    text-transform: none;
+    letter-spacing: 0;
+    font-style: italic;
   }
 
   input, select {
     width: 100%;
     padding: 0.6rem 0.75rem;
-    background: var(--card-2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 2px;
+    color: var(--ink);
     font-size: 0.95rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, background 0.15s;
   }
 
   input:focus, select:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(56,189,248,0.15);
+    background: #fffdf7;
+    box-shadow: 0 0 0 3px rgba(194,65,12,0.18);
   }
 
   .actions {
     display: flex;
     gap: 0.75rem;
-    margin-top: 1.25rem;
+    margin-top: 1.35rem;
     flex-wrap: wrap;
   }
 
   button {
-    padding: 0.7rem 1.25rem;
-    border-radius: 8px;
-    border: none;
-    font-size: 0.95rem;
-    font-weight: 600;
+    padding: 0.75rem 1.4rem;
+    border-radius: 2px;
+    border: 2px solid var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
     cursor: pointer;
-    transition: transform 0.05s, filter 0.15s;
+    transition: transform 0.05s, filter 0.15s, background 0.15s, color 0.15s;
   }
 
   button:active { transform: translateY(1px); }
 
   .primary {
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    color: #0f172a;
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
   }
 
-  .primary:hover { filter: brightness(1.08); }
+  .primary:hover { filter: brightness(1.1); }
 
   .secondary {
     background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
+    border: 2px solid var(--ink);
+    color: var(--ink);
   }
 
-  .secondary:hover { color: var(--text); border-color: var(--muted); }
+  .secondary:hover { background: var(--ink); color: var(--paper); }
 
   #results { display: none; }
 
@@ -138,207 +162,224 @@
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 2px solid var(--ink);
   }
 
   .results-header h2 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--ink);
   }
 
   .tag {
-    font-size: 0.75rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    background: var(--card-2);
-    color: var(--muted);
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
-    border: 1px solid var(--border);
+    letter-spacing: 0.08em;
+    background: var(--accent);
+    color: var(--paper);
+    padding: 0.3rem 0.7rem;
+    border-radius: 2px;
+    border: 2px solid var(--accent);
+    font-weight: 700;
   }
 
   .summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 0.75rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
   }
 
   .stat {
-    background: var(--card-2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.75rem 0.9rem;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 2px;
+    padding: 0.85rem 0.95rem;
   }
 
   .stat .label {
-    font-size: 0.72rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     color: var(--muted);
+    font-weight: 700;
   }
 
   .stat .value {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-top: 0.15rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-top: 0.2rem;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 0.92rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
 
   th, td {
     text-align: right;
-    padding: 0.55rem 0.5rem;
-    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 0.5rem;
+    border-bottom: 1px solid var(--border-soft);
+    font-variant-numeric: tabular-nums;
   }
 
   th:first-child, td:first-child { text-align: left; }
 
   th {
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     color: var(--muted);
-    font-weight: 600;
+    font-weight: 700;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 0.5rem;
   }
 
   tr.total td {
-    font-weight: 700;
-    border-top: 2px solid var(--border);
+    font-weight: 800;
+    border-top: 2px solid var(--ink);
     border-bottom: none;
+    color: var(--ink);
   }
-
-  
 
   /* ---------- Pie chart ---------- */
   .chart-wrap {
     display: flex;
     justify-content: center;
-    margin: 1.5rem 0 1rem;
+    margin: 1.75rem 0 1rem;
+    padding: 1rem;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 2px;
   }
 
-    #pie-chart {
+  #pie-chart {
     max-width: 820px;
     width: 100%;
     height: auto;
   }
 
-  /* .narration {
-    margin-top: 1.25rem;
-    padding: 0.9rem 1rem;
-    border-left: 3px solid var(--accent);
-    background: rgba(56,189,248,0.06);
-    border-radius: 0 8px 8px 0;
-    font-style: italic;
-    color: var(--text);
-    font-size: 0.92rem;
-  } */
-
-    /* ---------- Total rent callout ---------- */
+  /* ---------- Total rent callout ---------- */
   .total-rent {
-    margin: 1.5rem 0 1rem;
-    padding: 1.25rem 1.5rem;
-    background: linear-gradient(160deg, rgba(249,115,22,0.12), rgba(249,115,22,0.04));
-    border: 1px solid rgba(249,115,22,0.45);
-    border-radius: 12px;
+    margin: 1.75rem 0 1rem;
+    padding: 1.4rem 1.5rem;
+    background: var(--accent-soft);
+    border: 2px solid var(--ink);
+    border-left: 10px solid var(--accent);
+    border-radius: 2px;
     text-align: center;
   }
 
   .total-rent-label {
-    font-size: 0.75rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    margin-bottom: 0.35rem;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+    font-weight: 700;
   }
 
   .total-rent-value {
-    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    font-size: clamp(1.85rem, 5.5vw, 2.75rem);
     font-weight: 800;
-    color: var(--rent);
-    line-height: 1.1;
+    color: var(--accent);
+    line-height: 1.05;
     font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
   }
 
   .total-rent-sub {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     font-size: 0.85rem;
     color: var(--muted);
-    margin-top: 0.4rem;
+    margin-top: 0.5rem;
+    font-style: italic;
   }
 
-  /* ---------- Upgraded narration ---------- */
+  /* ---------- Narration ---------- */
   .narration {
-    margin-top: 1.5rem;
-    padding: 1.5rem 1.75rem;
-    border-left: 4px solid var(--accent);
-    background: linear-gradient(135deg, rgba(56,189,248,0.10), rgba(34,211,238,0.04));
-    border-radius: 0 12px 12px 0;
+    margin-top: 1.75rem;
+    padding: 1.5rem 1.65rem;
+    border: 2px solid var(--ink);
+    border-left: 10px solid var(--accent);
+    background: var(--card);
+    border-radius: 2px;
     font-style: normal;
-    color: var(--text);
+    color: var(--ink-soft);
     font-size: 1.15rem;
     line-height: 1.6;
   }
 
   .narration strong {
-    color: var(--accent-2);
-    font-weight: 700;
+    color: var(--accent);
+    font-weight: 800;
   }
 
   .narration .lede {
     display: block;
-    font-size: 0.75rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     color: var(--muted);
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.7rem;
     font-weight: 700;
   }
 
-  @media (max-width: 620px) {
-    .narration { font-size: 1.05rem; padding: 1.25rem 1.25rem; }
-  }
-
   .error {
-    background: rgba(248,113,113,0.1);
-    border: 1px solid #f87171;
-    color: #fecaca;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
+    background: #fbe4dc;
+    border: 2px solid var(--accent);
+    color: var(--accent-2);
+    padding: 0.85rem 1rem;
+    border-radius: 2px;
     margin-top: 1rem;
     font-size: 0.9rem;
     display: none;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
   }
 
   footer.footer {
     text-align: center;
     color: var(--muted);
-    font-size: 0.8rem;
-    margin-top: 2rem;
+    font-size: 0.82rem;
+    margin-top: 3rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
+    border-top: 2px solid var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
 
   footer.footer a {
     color: var(--accent);
     text-decoration: none;
+    font-weight: 700;
   }
 
   footer.footer a:hover { text-decoration: underline; }
 
   @media (max-width: 620px) {
+    .card { padding: 1.25rem 1.1rem 1.1rem; box-shadow: 4px 4px 0 var(--ink); }
+    .narration { font-size: 1.05rem; padding: 1.25rem 1.25rem; }
     table { font-size: 0.82rem; }
-    th, td { padding: 0.45rem 0.3rem; }
+    th, td { padding: 0.5rem 0.3rem; }
+    .total-rent { padding: 1.15rem 1rem; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Rent-Burden Analysis</h1>
+  <h1>Rent-<em>Burden</em> Analysis</h1>
   <p class="subtitle">See how much of your paycheck goes to your landlord — and how much is left for everything else.</p>
 
   <div class="card">
@@ -370,7 +411,7 @@
         </div>
 
         <div>
-          <label for="shift_length">Shift length <span class="hint">(used in results table)</span></label>
+          <label for="shift_length">Work day length <span class="hint">(used in results table)</span></label>
           <select id="shift_length">
             <option value="8">8 hours</option>
             <option value="10">10 hours</option>
@@ -380,7 +421,7 @@
         </div>
 
         <div id="custom-shift-wrap" style="display:none;">
-          <label for="custom_shift">Custom shift length (hours)</label>
+          <label for="custom_shift">Custom work day length (hours)</label>
           <input type="number" id="custom_shift" step="0.5" min="1" max="24" value="12" />
         </div>
 
@@ -388,7 +429,8 @@
           <label for="monthly_rent">Monthly rent ($)</label>
           <input type="number" id="monthly_rent" step="10" min="0" value="1700" required />
         </div>
-                <div>
+
+        <div>
           <label for="tenure_years">Years with current landlord</label>
           <input type="number" id="tenure_years" step="1" min="0" max="80" value="3" />
         </div>
@@ -398,7 +440,6 @@
           <input type="number" id="tenure_months" step="1" min="0" max="11" value="6" />
         </div>
       </div>
-
 
       <div class="actions">
         <button type="submit" class="primary">Run analysis</button>
@@ -449,8 +490,7 @@
     </div>
 
     <div class="chart-wrap">
-      <canvas id="pie-chart" width="900" role="img" aria-label="Pie chart showing the share of your paycheck that goes to rent versus everything else"></canvas>
-      <!-- <canvas id="pie-chart" width="620" height="360" role="img" aria-label="Pie chart showing the share of your paycheck that goes to rent versus everything else"></canvas> -->
+      <canvas id="pie-chart" width="820" role="img" aria-label="Pie chart showing the share of your paycheck that goes to rent versus everything else"></canvas>
     </div>
 
     <div class="narration" id="narration"></div>
@@ -489,12 +529,11 @@ function analyzeRentBurden({
 
   const monthlyGross = annualGross / 12;
   const monthlyHours = (hoursPerWeek * weeksPerYear) / 12;
-  
 
   // --- 2. The two buckets: rent and everything else ---
   const monthlyRemainder = monthlyGross - monthlyRent;
 
-  // --- 3. Convert to hours, 8-hr days, and chosen shifts ---
+  // --- 3. Convert to hours and chosen work days ---
   const hoursFor = (cost) => (hourlyWage ? cost / hourlyWage : Infinity);
   const hoursRent = hoursFor(monthlyRent);
   const hoursRemainder = hoursFor(monthlyRemainder);
@@ -560,20 +599,13 @@ function clearError() {
 }
 
 /* ---------- Pie chart drawing (no libraries) ---------- */
-
 function drawPie(canvas, segments) {
-//   const ctx = canvas.getContext("2d");
-//   const W = 620;
-//   const H = 360;
-//   const cx = W / 2;
-//   const cy = H / 2;
-//   const radius = Math.min(W, H) / 2 - 20;
   const ctx = canvas.getContext("2d");
   const W = canvas.clientWidth || 820;
-  const H = Math.round(W * 0.45);  // maintain a pleasing aspect ratio
+  const H = Math.round(W * 0.45);
   const cx = W / 2;
   const cy = H / 2;
-  const radius = Math.min(W, H) / 2 - 24;
+  const radius = Math.min(W, H) / 2 - 28;
 
   // Hi-DPI scaling
   const dpr = window.devicePixelRatio || 1;
@@ -593,8 +625,11 @@ function drawPie(canvas, segments) {
   if (total <= 0) {
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.fillStyle = "#273449";
+    ctx.fillStyle = "#ebe5d8";
     ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#111111";
+    ctx.stroke();
     return;
   }
 
@@ -609,17 +644,18 @@ function drawPie(canvas, segments) {
       return;
     }
     const slice = (value / total) * Math.PI * 2;
-    const endAngle = startAngle - slice;  // subtract => counterclockwise
+    const endAngle = startAngle - slice;
 
     ctx.beginPath();
     ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, radius, startAngle, endAngle, true); // anticlockwise = true
+    ctx.arc(cx, cy, radius, startAngle, endAngle, true);
     ctx.closePath();
     ctx.fillStyle = seg.color;
     ctx.fill();
 
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#1e293b";
+    // Ink stroke around each slice for a hand-drawn feel
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#111111";
     ctx.stroke();
 
     const midAngle = startAngle - slice / 2;
@@ -627,16 +663,19 @@ function drawPie(canvas, segments) {
     startAngle = endAngle;
   });
 
-  // Donut hole
+  // Donut hole in paper tone with an ink ring
   ctx.beginPath();
   ctx.arc(cx, cy, radius * 0.5, 0, Math.PI * 2);
-  ctx.fillStyle = "#1e293b";
+  ctx.fillStyle = "#f5f1e8";
   ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "#111111";
+  ctx.stroke();
 
   // Leader lines + labels
   const labelRadius = radius + 14;
-  const elbowRadius = radius + 28;
-  const textPad = 6;
+  const elbowRadius = radius + 30;
+  const textPad = 8;
 
   segments.forEach((seg, i) => {
     const mid = sliceAngles[i];
@@ -651,21 +690,21 @@ function drawPie(canvas, segments) {
     const y2 = cy + sin * elbowRadius;
 
     const isRight = cos >= 0;
-    const x3 = x2 + (isRight ? 28 : -28);
+    const x3 = x2 + (isRight ? 30 : -30);
     const y3 = y2;
 
-    // Leader line
+    // Leader line — ink stroke, accent-tinted
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.lineTo(x3, y3);
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = seg.color;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#111111";
     ctx.stroke();
 
-    // Text
-    ctx.font = "600 18px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
-    ctx.fillStyle = seg.color;
+    // Text — sans-serif, bold, ink
+    ctx.font = "800 18px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+    ctx.fillStyle = "#111111";
     ctx.textAlign = isRight ? "left" : "right";
     ctx.textBaseline = "middle";
 
@@ -694,6 +733,7 @@ $("input-form").addEventListener("submit", (e) => {
       ? parseFloat($("custom_shift").value)
       : parseFloat(shiftChoice);
 
+  // --- Validation (all errors collected, then displayed together) ---
   const errors = [];
   if (!isFinite(salary) || salary < 0) errors.push("Salary must be a non-negative number.");
   if (!isFinite(hoursPerWeek) || hoursPerWeek <= 0) errors.push("Hours per week must be greater than 0.");
@@ -701,14 +741,15 @@ $("input-form").addEventListener("submit", (e) => {
     errors.push("Weeks per year must be between 1 and 52.");
   if (!isFinite(monthlyRent) || monthlyRent < 0) errors.push("Rent must be a non-negative number.");
   if (!isFinite(shiftLength) || shiftLength <= 0 || shiftLength > 24)
-    errors.push("Shift length must be between 0 and 24 hours.");
+    errors.push("Work day length must be between 0 and 24 hours.");
+  if (!Number.isInteger(tenureYears) || tenureYears < 0)
+    errors.push("Years with landlord must be a non-negative whole number.");
+  if (!Number.isInteger(tenureMonths) || tenureMonths < 0 || tenureMonths > 11)
+    errors.push("Additional months must be between 0 and 11.");
 
   if (errors.length) {
     showError(errors.join(" "));
     return;
-  if (!Number.isInteger(tenureYears) || tenureYears < 0) errors.push("Years with landlord must be a non-negative whole number.");
-  if (!Number.isInteger(tenureMonths) || tenureMonths < 0 || tenureMonths > 11)
-    errors.push("Additional months must be between 0 and 11.");
   }
 
   const r = analyzeRentBurden({
@@ -722,8 +763,8 @@ $("input-form").addEventListener("submit", (e) => {
 
   // --- Percentage of paycheck going to rent ---
   const rentPct = r.monthlyGross > 0 ? (r.monthlyRent / r.monthlyGross) * 100 : 0;
-  const remainPct = 100 - rentPct;
-    // --- Total rent paid over tenure ---
+
+  // --- Total rent paid over tenure ---
   const totalMonths = tenureYears * 12 + tenureMonths;
   const totalRentPaid = r.monthlyRent * totalMonths;
 
@@ -733,6 +774,7 @@ $("input-form").addEventListener("submit", (e) => {
 
   $("out-monthly").textContent = fmtMoneyShort(r.monthlyGross);
   $("out-pct").textContent = rentPct.toFixed(1) + "%";
+
   const payPerWorkDay = r.hourlyWage * shiftLength;
   $("out-perday").textContent = fmtMoney(payPerWorkDay);
 
@@ -746,23 +788,10 @@ $("input-form").addEventListener("submit", (e) => {
     totalBox.style.display = "none";
   }
 
-    // --- Update the work-day column header ---
+  // --- Update the work-day column header ---
   $("shift-col-header").textContent = `${shiftLength}-hr work days`;
-//   // --- Decide whether to show both time columns ---
-//   const showBothColumns = Math.abs(shiftLength - EIGHT_HOUR_DAY) > 0.001;
-//   const headRow = $("table-head-row");
 
-//   headRow.innerHTML = showBothColumns
-//     ? `<th>Obligation</th>
-//        <th>Monthly $</th>
-//        <th>Hours</th>
-//        <th>8-hr days</th>
-//        <th>${shiftLength}-hr shifts</th>`
-//     : `<th>Obligation</th>
-//        <th>Monthly $</th>
-//        <th>Hours</th>
-//        <th>${shiftLength}-hr shifts</th>`;
-
+  // --- Table rows ---
   const rows = [
     ["Rent (landlord)", r.monthlyRent, r.hoursRent, r.shiftsRent],
     ["Everything else", r.monthlyRemainder, r.hoursRemainder, r.shiftsRemainder, true],
@@ -780,37 +809,13 @@ $("input-form").addEventListener("submit", (e) => {
       `<td>${fmtShifts(shifts)}</td>`;
     tbody.appendChild(tr);
   }
-//   const rows = [
-//     ["Rent (landlord)", r.monthlyRent, r.hoursRent, r.daysRent, r.shiftsRent],
-//     ["Everything else", r.monthlyRemainder, r.hoursRemainder, r.daysRemainder, r.shiftsRemainder, true],
-//   ];
-
-//   const tbody = $("table-body");
-//   tbody.innerHTML = "";
-//   for (const [label, cost, hrs, days, shifts, isTotal] of rows) {
-//     const tr = document.createElement("tr");
-//     if (isTotal) tr.classList.add("total");
-
-//     const cells = [
-//       `<td>${label}</td>`,
-//       `<td>${fmtMoney(cost)}</td>`,
-//       `<td>${fmtHours(hrs)}</td>`,
-//     ];
-//     if (showBothColumns) {
-//       cells.push(`<td>${fmtDays(days)}</td>`);
-//     }
-//     cells.push(`<td>${fmtShifts(shifts)}</td>`);
-
-//     tr.innerHTML = cells.join("");
-//     tbody.appendChild(tr);
-//   }
 
   // --- Pie chart ---
-  const rentColor = getComputedStyle(document.documentElement).getPropertyValue("--rent").trim() || "#f97316";
-  const remainColor = getComputedStyle(document.documentElement).getPropertyValue("--remain").trim() || "#34d399";
+  const rentColor = getComputedStyle(document.documentElement).getPropertyValue("--rent").trim() || "#c2410c";
+  const remainColor = getComputedStyle(document.documentElement).getPropertyValue("--remain").trim() || "#2b2b2b";
 
   drawPie($("pie-chart"), [
-    { value: Math.max(0, r.monthlyRent),     color: rentColor,   label: "Rent" },
+    { value: Math.max(0, r.monthlyRent),      color: rentColor,   label: "Rent" },
     { value: Math.max(0, r.monthlyRemainder), color: remainColor, label: "Everything else" },
   ]);
 
@@ -840,21 +845,6 @@ $("input-form").addEventListener("submit", (e) => {
       tenurePhrase;
   }
   $("narration").innerHTML = narration;
-  // let narration = "";
-  // if (rentPct >= 50) {
-  //   narration =
-  //     `This person hands over <strong>${rentPct.toFixed(1)}%</strong> of every paycheck to their landlord — ` +
-  //     `more than half of their working life. That's <strong>${r.hoursRent.toFixed(1)} hours</strong> per month ` +
-  //     `(or <strong>${r.shiftsRent.toFixed(2)}</strong> ${shiftLength}-hour work days) spent working for the landlord, ` +
-  //     `versus <strong>${r.hoursRemainder.toFixed(1)} hours</strong> for everything else.`;
-  // } else {
-  //   narration =
-  //     `This person hands over <strong>${rentPct.toFixed(1)}%</strong> of every paycheck to their landlord. ` +
-  //     `That's <strong>${r.hoursRent.toFixed(1)} hours</strong> per month ` +
-  //     `(or <strong>${r.shiftsRent.toFixed(2)}</strong> ${shiftLength}-hour work days) spent working for the landlord, ` +
-  //     `versus <strong>${r.hoursRemainder.toFixed(1)} hours</strong> for everything else.`;
-  // }
-  // $("narration").innerHTML = narration;
 
   $("results").style.display = "block";
   $("results").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -871,10 +861,10 @@ $("reset-btn").addEventListener("click", () => {
   $("custom-shift-wrap").style.display = "none";
   $("custom_shift").value = "12";
   $("monthly_rent").value = "1700";
-  clearError();
-  $("results").style.display = "none";
   $("tenure_years").value = "3";
   $("tenure_months").value = "6";
+  clearError();
+  $("results").style.display = "none";
 });
 </script>
 </body>

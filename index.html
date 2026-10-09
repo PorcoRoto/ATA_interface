@@ -6,29 +6,33 @@
 <title>Who are you Really Working For? — A Zine from the Albuquerque Tenant Assembly</title>
 <style>
   :root {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --card-2: #273449;
-    --text: #e2e8f0;
-    --muted: #94a3b8;
-    --accent: #38bdf8;
-    --accent-2: #22d3ee;
-    --rent: #f97316;
-    --tax: #a78bfa;
-    --remain: #34d399;
-    --border: #334155;
+    --paper: #f5f1e8;
+    --paper-2: #ebe5d8;
+    --card: #faf7f0;
+    --ink: #111111;
+    --ink-soft: #2b2b2b;
+    --muted: #5a5a5a;
+    --accent: #c2410c;       /* dark orange */
+    --accent-2: #9a3412;     /* deeper orange for hover */
+    --accent-soft: #f4d9c4;  /* pale orange wash */
+    --border: #111111;
+    --border-soft: #c9c2b2;
+    --shadow: rgba(17,17,17,0.18);
   }
 
   * { box-sizing: border-box; }
 
   body {
     margin: 0;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: radial-gradient(circle at top, #1e293b 0%, #0f172a 60%);
-    color: var(--text);
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+    background: var(--paper);
+    color: var(--ink);
     min-height: 100vh;
     padding: 2rem 1rem 4rem;
-    line-height: 1.65;
+    line-height: 1.7;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(0,0,0,0.025) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(0,0,0,0.03) 0%, transparent 45%);
   }
 
   .wrap {
@@ -40,46 +44,65 @@
   .cover {
     text-align: center;
     padding: 2.5rem 1.5rem 3rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 3px solid var(--ink);
     margin-bottom: 2.5rem;
+    position: relative;
   }
 
+  /* .cover .sun {
+    display: block;
+    margin: 0 auto 1.5rem;
+    width: 96px;
+    height: 96px;
+  } */
+  .cover .sun { width: 420px; height: auto; }
+
   .cover .kicker {
-    font-size: 0.75rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 0.25em;
+    letter-spacing: 0.28em;
     color: var(--accent);
     margin-bottom: 1rem;
+    font-weight: 700;
   }
 
   .cover h1 {
-    font-size: clamp(2rem, 6vw, 3rem);
-    line-height: 1.1;
-    margin: 0 0 1rem;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    font-size: clamp(2rem, 6.5vw, 3.25rem);
+    line-height: 1.05;
+    margin: 0 0 1.25rem;
+    color: var(--ink);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .cover h1 em {
+    font-style: italic;
+    color: var(--accent);
   }
 
   .cover .byline {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     color: var(--muted);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     margin: 0;
+    letter-spacing: 0.02em;
   }
 
   .cover .byline strong {
-    color: var(--text);
+    color: var(--ink);
+    font-weight: 700;
   }
 
   /* ---------- Panels ---------- */
   .panel {
     background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.75rem 1.75rem 1.5rem;
+    border: 2px solid var(--ink);
+    border-radius: 2px;
+    padding: 1.85rem 1.75rem 1.6rem;
     margin-bottom: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    box-shadow: 6px 6px 0 var(--ink);
     position: relative;
     animation: fadeUp 0.5s ease both;
   }
@@ -91,23 +114,26 @@
 
   .panel .num {
     position: absolute;
-    top: -14px;
+    top: -16px;
     left: 1.5rem;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    color: #0f172a;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     font-weight: 800;
     font-size: 0.85rem;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(56,189,248,0.3);
+    border: 2px solid var(--ink);
   }
 
   .panel p {
     margin: 0 0 1rem;
+    font-size: 1.02rem;
+    color: var(--ink-soft);
   }
 
   .panel p:last-child {
@@ -115,47 +141,62 @@
   }
 
   .panel strong {
-    color: #fff;
+    color: var(--ink);
+    font-weight: 700;
   }
 
   /* ---------- Highlighted "math" callout ---------- */
   .callout {
-    background: var(--card-2);
-    border-left: 3px solid var(--accent);
-    border-radius: 0 8px 8px 0;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-left: 8px solid var(--accent);
+    border-radius: 0;
     padding: 1rem 1.25rem;
-    margin: 1.25rem 0;
-    font-size: 0.95rem;
+    margin: 1.4rem 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.92rem;
   }
 
   .callout .row {
     display: flex;
     justify-content: space-between;
     gap: 1rem;
-    padding: 0.3rem 0;
-    border-bottom: 1px dashed var(--border);
+    padding: 0.35rem 0;
+    border-bottom: 1px dashed var(--border-soft);
   }
 
   .callout .row:last-child {
     border-bottom: none;
     font-weight: 700;
-    color: #fff;
-    padding-top: 0.5rem;
+    color: var(--ink);
+    padding-top: 0.55rem;
+    border-top: 2px solid var(--ink);
+    margin-top: 0.35rem;
   }
 
-  .callout .row .label { color: var(--muted); }
-  .callout .row .value { font-variant-numeric: tabular-nums; }
+  .callout .row .label {
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    align-self: center;
+  }
 
-  .accent-rent { color: var(--rent); font-weight: 700; }
-  .accent-tax { color: var(--tax); font-weight: 700; }
-  .accent-remain { color: var(--remain); font-weight: 700; }
+  .callout .row .value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 1rem;
+  }
 
+  .accent-rent { color: var(--accent); font-weight: 700; }
+  .accent-tax { color: var(--accent); font-weight: 700; }
+  .accent-remain { color: var(--ink); font-weight: 700; }
 
-    /* ---------- Source note (linked reference) ---------- */
+  /* ---------- Source note (linked reference) ---------- */
   .source-note {
-    background: linear-gradient(160deg, rgba(56,189,248,0.08), rgba(34,211,238,0.04));
-    border: 1px solid rgba(56,189,248,0.35);
-    border-radius: 10px;
+    background: var(--accent-soft);
+    border: 2px solid var(--ink);
+    border-radius: 2px;
     padding: 1rem 1.25rem;
     margin: 1.25rem 0;
     font-size: 0.9rem;
@@ -163,10 +204,12 @@
 
   .source-note-title {
     margin: 0 0 0.5rem;
-    font-weight: 700;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-weight: 800;
     color: var(--accent);
-    font-size: 0.95rem;
-    letter-spacing: 0.02em;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   .source-note-icon {
@@ -175,12 +218,12 @@
 
   .source-note-body {
     margin: 0 0 0.75rem;
-    color: var(--text);
+    color: var(--ink-soft);
     line-height: 1.6;
   }
 
   .source-note-body strong {
-    color: #fff;
+    color: var(--ink);
   }
 
   .source-note-link {
@@ -189,27 +232,30 @@
   }
 
   .source-note-link a {
-    color: var(--accent-2);
+    color: var(--accent);
     text-decoration: none;
-    border-bottom: 1px dashed rgba(34,211,238,0.5);
+    border-bottom: 1px dashed var(--accent);
     padding-bottom: 1px;
     transition: color 0.15s, border-color 0.15s;
+    font-weight: 600;
   }
 
   .source-note-link a:hover {
-    color: #fff;
-    border-bottom-color: #fff;
+    color: var(--ink);
+    border-bottom-color: var(--ink);
   }
+
   /* ---------- Pull quote ---------- */
   .pullquote {
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-style: italic;
     text-align: center;
-    color: var(--accent-2);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    padding: 1.25rem 0.5rem;
-    margin: 1.5rem 0;
+    color: var(--accent);
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    padding: 1.35rem 0.5rem;
+    margin: 1.6rem 0;
+    font-weight: 500;
   }
 
   /* ---------- Small muted aside ---------- */
@@ -223,22 +269,26 @@
   /* ---------- Final CTA ---------- */
   .cta {
     text-align: center;
-    background: linear-gradient(160deg, var(--card-2), var(--card));
-    border: 1px solid var(--accent);
-    border-radius: 16px;
-    padding: 2rem 1.5rem;
-    margin-top: 2rem;
+    background: var(--ink);
+    color: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 2px;
+    padding: 2.25rem 1.75rem 2rem;
+    margin-top: 2.5rem;
+    box-shadow: 6px 6px 0 var(--accent);
   }
 
   .cta h2 {
     margin: 0 0 0.75rem;
-    font-size: 1.5rem;
-    color: #fff;
+    font-size: 1.6rem;
+    color: var(--paper);
+    font-weight: 800;
   }
 
   .cta p {
-    color: var(--muted);
+    color: #d9d3c6;
     margin: 0 0 1.5rem;
+    font-size: 1rem;
   }
 
   .cta .buttons {
@@ -251,68 +301,78 @@
   .cta a.button {
     display: inline-block;
     padding: 0.8rem 1.5rem;
-    border-radius: 8px;
+    border-radius: 2px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     font-weight: 700;
     text-decoration: none;
     transition: filter 0.15s, transform 0.05s;
+    letter-spacing: 0.02em;
+    border: 2px solid var(--paper);
   }
 
   .cta a.button:active { transform: translateY(1px); }
 
   .cta a.primary {
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-    color: #0f172a;
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
   }
 
-  .cta a.primary:hover { filter: brightness(1.08); }
+  .cta a.primary:hover { filter: brightness(1.1); }
 
   .cta a.secondary {
     background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
+    color: var(--paper);
+    border-color: var(--paper);
   }
 
-  .cta a.secondary:hover { color: var(--text); border-color: var(--muted); }
+  .cta a.secondary:hover { background: var(--paper); color: var(--ink); }
 
   /* ---------- QR code placeholder ---------- */
   .qr {
-    width: 140px;
-    height: 140px;
-    margin: 1.5rem auto 0;
-    background: #fff;
-    border-radius: 12px;
+    width: 150px;
+    height: 150px;
+    margin: 1.75rem auto 0;
+    background: var(--paper);
+    border: 2px solid var(--paper);
+    border-radius: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #0f172a;
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     font-size: 0.7rem;
     font-weight: 700;
     text-align: center;
     padding: 0.5rem;
-    line-height: 1.2;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    line-height: 1.3;
+    letter-spacing: 0.03em;
   }
 
   /* ---------- Footer ---------- */
   .footer {
     text-align: center;
     color: var(--muted);
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     margin-top: 3rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
+    border-top: 2px solid var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
 
   .footer a {
     color: var(--accent);
     text-decoration: none;
+    font-weight: 600;
   }
 
   .footer a:hover { text-decoration: underline; }
 
   @media (max-width: 480px) {
-    .panel { padding: 1.5rem 1.25rem 1.25rem; }
+    .panel { padding: 1.5rem 1.25rem 1.25rem; box-shadow: 4px 4px 0 var(--ink); }
     .cover { padding: 1.5rem 0.5rem 2rem; }
+    .cover .sun { width: 72px; height: 72px; }
+    .cta { box-shadow: 4px 4px 0 var(--accent); }
   }
 </style>
 </head>
@@ -321,33 +381,60 @@
 
   <!-- ============ COVER ============ -->
   <header class="cover">
+    <!-- <svg class="sun" viewBox="0 0 100 100" aria-hidden="true"> -->
+    <img src="draftlogo.jpeg" class="sun" alt="" />
+      <!-- Sun body: irregular polygon to echo the hand-drawn graphic -->
+      <polygon points="50,6 60,14 72,12 79,22 90,28 91,41 97,51 91,62 91,74 80,80 72,90 60,88 50,96 40,88 28,90 20,80 10,74 10,62 4,51 10,41 11,28 22,22 28,12 40,14"
+               fill="#2b2b2b" />
+      <!-- Center hole -->
+      <circle cx="50" cy="50" r="9" fill="#f5f1e8" />
+      <!-- Rays (white wedges cut into the sun) -->
+      <g fill="#f5f1e8">
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(0 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(22.5 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(45 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(67.5 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(90 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(112.5 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(135 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(157.5 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(180 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(202.5 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(225 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(247.5 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(270 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(292.5 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(315 50 50)" />
+        <rect x="47.5" y="18" width="5" height="14" transform="rotate(337.5 50 50)" />
+      </g>
+    </svg>
     <div class="kicker">A Zine About Work &amp; Rent</div>
-    <h1>Who are you Really working for?</h1>
+    <h1>Who are you <em>Really</em> working for?</h1>
     <p class="byline">by the <strong>Albuquerque Tenant Assembly</strong> · Albuquerque, NM</p>
   </header>
 
   <!-- ============ PANEL 1 ============ -->
   <section class="panel">
     <div class="num">1</div>
-    <p>Hi, I'm Jessica! I'm a single mom and I work as an ambulance medic here in Albuquerque. 
-      The cost of everything keeps going up, including the rent on my two-bedroom house, 
+    <p>Hi, I'm Jessica! I'm a single mom and I work as an ambulance medic here in Albuquerque.
+      The cost of everything keeps going up, including the rent on my two-bedroom house,
       but I work hard and always make sure my 6 year-old boy has everything he needs. </p>
   </section>
 
   <!-- ============ PANEL 2 ============ -->
   <section class="panel">
     <div class="num">2</div>
-    <p>I had a realization a few days ago that really upset me. A huge chunk of the pay I get for the hard work I 
-      do goes to someone who did absolutely nothing to earn it. My rent is by far the biggest expense I have every month, 
-      and I'm the one who did the hard work and put myself in danger to earn that money, not my landlord. I know it's pretty 
+    <p>I had a realization a few days ago that really upset me. A huge chunk of the pay I get for the hard work I
+      do goes to someone who did absolutely nothing to earn it. My rent is by far the biggest expense I have every month,
+      and I'm the one who did the hard work and put myself in danger to earn that money, not my landlord. I know it's pretty
       normal to have a landlord, but the more I think about it, the more it seems like something more people should be talking about.</p>
   </section>
 
   <!-- ============ PANEL 3 ============ -->
   <section class="panel">
     <div class="num">3</div>
-    <p>Most months I work fourteen 12-hr shifts. I make $26 per hour, so that's $312 per shift. Since I have to give $1700 to my landlord, 
-      that means that for almost 5 and a half days I'm working to make *him* money. 5 and a half days every month I work, but he he earns? 
+    <p>Most months I work fourteen 12-hr shifts. I make $26 per hour, so that's $312 per shift. Since I have to give $1700 to my landlord,
+      that means that for almost 5 and a half days I'm working to make *him* money. 5 and a half days every month I work, but he earns?
       Something isn't right about that.</p>
 
     <div class="callout">
@@ -373,51 +460,51 @@
   <!-- ============ PANEL 4 ============ -->
   <section class="panel">
     <div class="num">4</div>
-    <p>Most months my landlord doesn't even do anything. Occasionally he calls a plumber or electrician (if I 
-      complain about problems with the house for long enough), but it's not like he's actually doing the work 
-      to keep the house up. He's getting my money for doing nothing. A while back I learned that landlords have a 
-      term for this: "passive income." That sounds pretty innocuous, like "oh, it just flows into your bank 
-      account while you relax." Where did that income flow from? That was me, stabilizing broken bones, treating 
-      gunshot wounds, moving dead bodies, and all sorts of terrible circumstances that he never even has to think 
-      about. I don't know what he used to do for a living, maybe he was once a hard worker, or maybe he inherited 
-      money from a rich uncle. Either way, it's not right that he gets to demand that I work 5 and a half days for 
+    <p>Most months my landlord doesn't even do anything. Occasionally he calls a plumber or electrician (if I
+      complain about problems with the house for long enough), but it's not like he's actually doing the work
+      to keep the house up. He's getting my money for doing nothing. A while back I learned that landlords have a
+      term for this: "passive income." That sounds pretty innocuous, like "oh, it just flows into your bank
+      account while you relax." Where did that income flow from? That was me, stabilizing broken bones, treating
+      gunshot wounds, moving dead bodies, and all sorts of terrible circumstances that he never even has to think
+      about. I don't know what he used to do for a living, maybe he was once a hard worker, or maybe he inherited
+      money from a rich uncle. Either way, it's not right that he gets to demand that I work 5 and a half days for
       him every month. Why aren't more people mad about this?</p>
   </section>
 
   <!-- ============ PANEL 5 ============ -->
   <section class="panel">
     <div class="num">5</div>
-    <p>I know I’m not the only one who experiences this, in fact I’m better off than many of my friends and 
-      neighbors. My friend Gabe is a medical assistant, he's a single parent like me and also works very hard, but 
-      he only makes $19/hr. That means that fully half of his workdays are spent filling his landlord's pockets! I 
-      did the calculation and realized that in the 3 and a half years I've been in my current house I've given my l
-      andlord over $70,000! My dad sometimes scolds me for not buying my own house, but I tried and I was never able 
-      to afford a down payment. Turns out it's because I was giving it to someone else as their "passive income." 
-      I wouldn't be surprised if my landlord took all that cash and used it to fund a down payment on another house 
+    <p>I know I'm not the only one who experiences this, in fact I'm better off than many of my friends and
+      neighbors. My friend Gabe is a medical assistant, he's a single parent like me and also works very hard, but
+      he only makes $19/hr. That means that fully half of his workdays are spent filling his landlord's pockets! I
+      did the calculation and realized that in the 3 and a half years I've been in my current house I've given my 
+      landlord over $70,000! My dad sometimes scolds me for not buying my own house, but I tried and I was never able
+      to afford a down payment. Turns out it's because I was giving it to someone else as their "passive income."
+      I wouldn't be surprised if my landlord took all that cash and used it to fund a down payment on another house
       he can rent out...</p>
   </section>
 
   <!-- ============ PANEL 6 ============ -->
   <section class="panel">
     <div class="num">6</div>
-    <p>All my friends and neighbors are constantly struggling to make ends meet. When I think about that $70,000 I've 
-      just given away, then multiply that by the number of people I know who are in a similar situation to me it's 
-      actually a little bit shocking. We're out here clipping coupons for groceries, trying to find side hustles so we 
-      can earn a little extra to do nice things for our kids, turning up our thermostats in the summer, but also forking 
-      over millions of dollars to a group of people who could send the cops to throw us on the street (or worse) if we 
-      can't keep up their stream of "passive income?" How many landlords are there anyway? I'm pretty sure there are a 
+    <p>All my friends and neighbors are constantly struggling to make ends meet. When I think about that $70,000 I've
+      just given away, then multiply that by the number of people I know who are in a similar situation to me it's
+      actually a little bit shocking. We're out here clipping coupons for groceries, trying to find side hustles so we
+      can earn a little extra to do nice things for our kids, turning up our thermostats in the summer, but also forking
+      over millions of dollars to a group of people who could send the cops to throw us on the street (or worse) if we
+      can't keep up their stream of "passive income?" How many landlords are there anyway? I'm pretty sure there are a
       lot more of us than there are of them...</p>
   </section>
 
   <!-- ============ PANEL 7 ============ -->
   <section class="panel">
     <div class="num">7</div>
-    <p>Thinking about this makes me really angry, but I feel helpless to do anything about it. How did we get into this 
-      situation, where so many of us spend more time making other people rich than we do meeting our own needs? I don’t 
-      want to complain about it to my landlord because if I get kicked out of this house then I’ll be in an even worse 
-      situation. Recently I learned about something called a tenants’ union. I knew about labor unions, and I remember 
-      that workers used to come together and do really bold things to force their bosses to improve pay and conditions. 
-      Maybe us tenants should start thinking the same way. How much better would our lives be if all those hours on the 
+    <p>Thinking about this makes me really angry, but I feel helpless to do anything about it. How did we get into this
+      situation, where so many of us spend more time making other people rich than we do meeting our own needs? I don't
+      want to complain about it to my landlord because if I get kicked out of this house then I'll be in an even worse
+      situation. Recently I learned about something called a tenants' union. I knew about labor unions, and I remember
+      that workers used to come together and do really bold things to force their bosses to improve pay and conditions.
+      Maybe us tenants should start thinking the same way. How much better would our lives be if all those hours on the
       job actually contributed to our own accounts instead our lazy landlords? </p>
   </section>
 
