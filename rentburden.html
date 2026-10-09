@@ -766,119 +766,7 @@ function drawPie(canvas, segments) {
     });
   }
 }
-// function drawPie(canvas, segments) {
-//   const ctx = canvas.getContext("2d");
-//   const W = canvas.clientWidth || 820;
-//   const H = Math.round(W * 0.45);
-//   const cx = W / 2;
-//   const cy = H / 2;
-//   const radius = Math.min(W, H) / 2 - 28;
 
-//   // Hi-DPI scaling
-//   const dpr = window.devicePixelRatio || 1;
-//   if (canvas.dataset.dpr !== String(dpr)) {
-//     canvas.width = W * dpr;
-//     canvas.height = H * dpr;
-//     canvas.style.width = W + "px";
-//     canvas.style.height = H + "px";
-//     canvas.dataset.dpr = String(dpr);
-//   }
-//   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-//   ctx.clearRect(0, 0, W, H);
-
-//   const total = segments.reduce((sum, s) => sum + Math.max(0, s.value), 0);
-
-//   // Empty state
-//   if (total <= 0) {
-//     ctx.beginPath();
-//     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-//     ctx.fillStyle = "#ebe5d8";
-//     ctx.fill();
-//     ctx.lineWidth = 2;
-//     ctx.strokeStyle = "#111111";
-//     ctx.stroke();
-//     return;
-//   }
-
-//   // Draw slices counterclockwise starting at 12 o'clock
-//   let startAngle = -Math.PI / 2;
-//   const sliceAngles = [];
-
-//   segments.forEach((seg) => {
-//     const value = Math.max(0, seg.value);
-//     if (value === 0) {
-//       sliceAngles.push(null);
-//       return;
-//     }
-//     const slice = (value / total) * Math.PI * 2;
-//     const endAngle = startAngle - slice;
-
-//     ctx.beginPath();
-//     ctx.moveTo(cx, cy);
-//     ctx.arc(cx, cy, radius, startAngle, endAngle, true);
-//     ctx.closePath();
-//     ctx.fillStyle = seg.color;
-//     ctx.fill();
-
-//     // Ink stroke around each slice for a hand-drawn feel
-//     ctx.lineWidth = 3;
-//     ctx.strokeStyle = "#111111";
-//     ctx.stroke();
-
-//     const midAngle = startAngle - slice / 2;
-//     sliceAngles.push(midAngle);
-//     startAngle = endAngle;
-//   });
-
-//   // Donut hole in paper tone with an ink ring
-//   ctx.beginPath();
-//   ctx.arc(cx, cy, radius * 0.5, 0, Math.PI * 2);
-//   ctx.fillStyle = "#f5f1e8";
-//   ctx.fill();
-//   ctx.lineWidth = 3;
-//   ctx.strokeStyle = "#111111";
-//   ctx.stroke();
-
-//   // Leader lines + labels
-//   const labelRadius = radius + 14;
-//   const elbowRadius = radius + 30;
-//   const textPad = 8;
-
-//   segments.forEach((seg, i) => {
-//     const mid = sliceAngles[i];
-//     if (mid === null || mid === undefined) return;
-
-//     const cos = Math.cos(mid);
-//     const sin = Math.sin(mid);
-
-//     const x1 = cx + cos * labelRadius;
-//     const y1 = cy + sin * labelRadius;
-//     const x2 = cx + cos * elbowRadius;
-//     const y2 = cy + sin * elbowRadius;
-
-//     const isRight = cos >= 0;
-//     const x3 = x2 + (isRight ? 30 : -30);
-//     const y3 = y2;
-
-//     // Leader line — ink stroke, accent-tinted
-//     ctx.beginPath();
-//     ctx.moveTo(x1, y1);
-//     ctx.lineTo(x2, y2);
-//     ctx.lineTo(x3, y3);
-//     ctx.lineWidth = 2;
-//     ctx.strokeStyle = "#111111";
-//     ctx.stroke();
-
-//     // Text — sans-serif, bold, ink
-//     ctx.font = "800 18px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
-//     ctx.fillStyle = "#111111";
-//     ctx.textAlign = isRight ? "left" : "right";
-//     ctx.textBaseline = "middle";
-
-//     const pct = ((Math.max(0, seg.value) / total) * 100).toFixed(0);
-//     ctx.fillText(seg.label + " " + pct + "%", x3 + (isRight ? textPad : -textPad), y3);
-//   });
-// }
 
 $("input-form").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -985,10 +873,6 @@ $("input-form").addEventListener("submit", (e) => {
     { value: Math.max(0, r.monthlyRemainder), color: remainColor, label: "Everything else" },
   ];
   drawPie($("pie-chart"), lastPieSegments);
-  // drawPie($("pie-chart"), [
-  //   { value: Math.max(0, r.monthlyRent),      color: rentColor,   label: "Rent" },
-  //   { value: Math.max(0, r.monthlyRemainder), color: remainColor, label: "Everything else" },
-  // ]);
 
   // --- Narration ---
   const tenurePhrase = totalMonths > 0
