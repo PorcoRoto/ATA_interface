@@ -806,7 +806,8 @@ $("input-form").addEventListener("submit", (e) => {
     showError(errors.join(" "));
     return;
   }
-
+  // Reveal the results container so the canvas has a measurable width
+  $("results").style.display = "block";
   const r = analyzeRentBurden({
     salary,
     salaryType,
