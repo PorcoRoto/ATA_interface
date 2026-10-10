@@ -608,7 +608,7 @@ function drawPie(canvas, segments) {
   const W = canvas.clientWidth || 820;
 
   // Compact mode for narrow screens: stack labels above/below the pie
-  const compact = W < 860;
+  const compact = W < 520;
   const H = Math.round(compact ? W * 1.15 : W * 0.45);
 
   const cx = W / 2;
