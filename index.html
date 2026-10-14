@@ -311,6 +311,78 @@
     font-style: italic;
   }
 
+    /* ---------- Rent burden flag ---------- */
+  .burden-flag {
+    margin: 1.5rem 0 1rem;
+    padding: 1.25rem 1.5rem;
+    border: 2px solid var(--ink);
+    border-radius: 2px;
+    text-align: center;
+    position: relative;
+  }
+
+  .burden-flag-label {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+  }
+
+  .burden-flag-status {
+    font-size: clamp(1.35rem, 4vw, 1.85rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .burden-flag-detail {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin-top: 0.5rem;
+    line-height: 1.5;
+  }
+
+  .burden-flag-city {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    margin-top: 0.85rem;
+    padding-top: 0.85rem;
+    border-top: 1px dashed var(--border-soft);
+    line-height: 1.55;
+    text-align: left;
+  }
+
+  /* State variants */
+  .burden-flag.severe {
+    background: #fbe4dc;
+    border-left: 10px solid var(--accent);
+  }
+  .burden-flag.severe .burden-flag-status {
+    color: var(--accent);
+  }
+
+  .burden-flag.moderate {
+    background: var(--accent-soft);
+    border-left: 10px solid var(--accent);
+  }
+  .burden-flag.moderate .burden-flag-status {
+    color: var(--accent-2);
+  }
+
+  .burden-flag.ok {
+    background: var(--paper-2);
+    border-left: 10px solid var(--ink);
+  }
+  .burden-flag.ok .burden-flag-status {
+    color: var(--ink);
+  }
+
   /* ---------- Narration ---------- */
   .narration {
     margin-top: 1.75rem;
@@ -401,7 +473,7 @@
           <label for="salary">
             <span id="salary-label-text">Hourly wage ($)</span>
           </label>
-          <input type="number" id="salary" step="0.01" min="0" value="26" required />
+          <input type="number" id="salary" step="0.1" min="0" value="26" required />
         </div>
 
         <div>
@@ -472,6 +544,19 @@
       <div class="stat">
         <div class="label">Rent as % of pay</div>
         <div class="value" id="out-pct">—</div>
+      </div>
+    </div>
+
+    <!-- Rent burden flag -->
+    <div id="burden-flag" class="burden-flag" style="display:none;">
+      <div class="burden-flag-label">Rent Burden Status</div>
+      <div class="burden-flag-status" id="burden-status">—</div>
+      <div class="burden-flag-detail" id="burden-detail">—</div>
+      <!-- <div class="burden-flag-city" id="burden-city-note" style="display:none;">
+        You're not alone. The City of Albuquerque has stated that <strong>more than half of the city's renters are rent-burdened</strong>, spending over 30% of their income just to keep a roof over their heads.
+      </div> -->
+        <div class="burden-flag-city" id="burden-city-note" style="display:none;">
+        You're not alone. The City of Albuquerque has stated that <a href="https://www.cabq.gov/office-of-equity-inclusion/news/new-report-closing-the-housing-gap-for-indigenous-and-african-american-communities" target="_blank" rel="noopener noreferrer"><strong>more than half of the city's renters are rent-burdened</strong></a>, spending over 30% of their income just to keep a roof over their heads.
       </div>
     </div>
 
@@ -834,6 +919,49 @@ $("input-form").addEventListener("submit", (e) => {
   const payPerWorkDay = r.hourlyWage * shiftLength;
   $("out-perday").textContent = fmtMoney(payPerWorkDay);
 
+    // --- Rent burden flag (HUD thresholds) ---
+  const flag = $("burden-flag");
+  const flagStatus = $("burden-status");
+  const flagDetail = $("burden-detail");
+  const flagCity = $("burden-city-note");
+
+  flag.classList.remove("severe", "moderate", "ok");
+
+  if (rentPct > 50) {
+    flag.classList.add("severe");
+    flagStatus.textContent = "Severely Rent Burdened";
+    // flagDetail.innerHTML =
+    //   `You spend <strong>${rentPct.toFixed(1)}%</strong> of your income on rent. ` +
+    //   `According to <strong>HUD standards</strong>, paying more than <strong>50%</strong> of income toward rent makes you severely rent burdened.`;
+    flagDetail.innerHTML =
+      `You spend <strong>${rentPct.toFixed(1)}%</strong> of your income on rent. ` +
+      `According to <a href="https://www.huduser.gov/portal/datasets/cp.html" target="_blank" rel="noopener noreferrer"><strong>HUD standards</strong></a>, paying more than <strong>50%</strong> of income toward rent makes you severely rent burdened.`;
+    flagCity.style.display = "block";
+    flag.style.display = "block";
+  } else if (rentPct > 30) {
+    flag.classList.add("moderate");
+    flagStatus.textContent = "Rent Burdened";
+    // flagDetail.innerHTML =
+    //   `You spend <strong>${rentPct.toFixed(1)}%</strong> of your income on rent. ` +
+      // `According to <strong>HUD standards</strong>, paying more than <strong>30%</strong> of income toward rent makes you rent burdened.`;
+    flagDetail.innerHTML =
+      `You spend <strong>${rentPct.toFixed(1)}%</strong> of your income on rent. ` +
+      `According to <a href="https://www.huduser.gov/portal/datasets/cp.html" target="_blank" rel="noopener noreferrer"><strong>HUD standards</strong></a>, paying more than <strong>30%</strong> of income toward rent makes you rent burdened.`;
+    flagCity.style.display = "block";
+    flag.style.display = "block";
+  } else {
+    flag.classList.add("ok");
+    flagStatus.textContent = "Below HUD Threshold";
+    // flagDetail.innerHTML =
+    //   `You spend <strong>${rentPct.toFixed(1)}%</strong> of your income on rent, which is at or below ` +
+    //   `the <strong>HUD standard</strong> of 30%.`;
+    flagDetail.innerHTML =
+      `You spend <strong>${rentPct.toFixed(1)}%</strong> of your income on rent, which is at or below ` +
+      `the <a href="https://www.huduser.gov/portal/datasets/cp.html" target="_blank" rel="noopener noreferrer"><strong>HUD standard</strong></a> of 30%.`;
+    flagCity.style.display = "none";
+    flag.style.display = "block";
+  }
+
   const totalBox = $("total-rent-box");
   if (totalMonths > 0) {
     $("out-total-rent").textContent = fmtMoneyShort(totalRentPaid);
@@ -919,6 +1047,7 @@ $("reset-btn").addEventListener("click", () => {
   $("monthly_rent").value = "1700";
   $("tenure_years").value = "3";
   $("tenure_months").value = "6";
+  $("burden-flag").style.display = "none";
   clearError();
   $("results").style.display = "none";
 });
