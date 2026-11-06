@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Albuquerque Tenant Rights · Outreach Tool</title>
+  <!-- Leaflet CSS & JS (for map) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background: #f4f7fb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    .page-wrapper {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    /* Header & Mission */
+    .mission {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .mission h1 {
+      font-size: 2.4rem;
+      color: #1e2b3c;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.6rem;
+    }
+
+    .mission .subhead {
+      font-size: 1.2rem;
+      color: #2c3e50;
+      background: #e3edf7;
+      display: inline-block;
+      padding: 0.4rem 1.6rem;
+      border-radius: 40px;
+      font-weight: 500;
+      margin-bottom: 1.2rem;
+    }
+
+    .mission p {
+      max-width: 800px;
+      margin: 0 auto;
+      color: #334e68;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      background: white;
+      padding: 1.5rem 2rem;
+      border-radius: 24px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+      border: 1px solid #d9e2ec;
+    }
+
+    /* Main interactive card */
+    .interactive-card {
+      background: white;
+      border-radius: 32px;
+      box-shadow: 0 20px 30px -10px rgba(0, 20, 30, 0.15);
+      padding: 1.8rem 2rem 2.2rem;
+      border: 1px solid #cddbe8;
+      margin-top: 1rem;
+      transition: box-shadow 0.2s;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title h2 {
+      font-size: 1.7rem;
+      color: #0b2b40;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .card-title span {
+      background: #1f6e8c;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.25rem 1rem;
+      border-radius: 30px;
+      margin-left: auto;
+    }
+
+    /* Map container */
+    #map {
+      height: 420px;
+      width: 100%;
+      border-radius: 24px;
+      border: 2px solid #bdd3e6;
+      background: #d9eaf7;
+      z-index: 1;
+      margin-bottom: 1.8rem;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+    }
+
+    /* Popup / form area */
+    .form-panel {
+      background: #f0f6fd;
+      border-radius: 24px;
+      padding: 1.6rem 1.8rem;
+      border: 1px solid #b8d0e3;
+      transition: all 0.2s;
+      min-height: 140px;
+    }
+
+    .step-hidden {
+      display: none !important;
+    }
+
+    .selected-area-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 1.4rem;
+      font-weight: 600;
+      color: #0d3b57;
+    }
+
+    .selected-area-label i {
+      font-size: 1.2rem;
+    }
+
+    .zip-badge {
+      background: #1f6e8c;
+      color: white;
+      padding: 0.25rem 1.2rem;
+      border-radius: 40px;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .housing-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1rem 0 1.4rem;
+    }
+
+    .housing-btn {
+      background: white;
+      border: 2px solid #b0c9dd;
+      border-radius: 60px;
+      padding: 0.8rem 1.8rem;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #1e3b4f;
+      cursor: pointer;
+      transition: all 0.15s;
+      flex: 1 1 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .housing-btn:hover {
+      background: #e1effa;
+      border-color: #1f6e8c;
+    }
+
+    .housing-btn.selected {
+      background: #1f6e8c;
+      border-color: #1f6e8c;
+      color: white;
+      box-shadow: 0 8px 14px -6px #1f6e8c60;
+    }
+
+    .contact-methods {
+      margin-top: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .contact-methods p {
+      font-weight: 500;
+      color: #12354b;
+      margin-bottom: 0.2rem;
+    }
+
+    .contact-input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .contact-input-group input {
+      flex: 2 1 220px;
+      padding: 0.9rem 1.2rem;
+      border-radius: 40px;
+      border: 1.5px solid #b8cfdf;
+      font-size: 1rem;
+      background: white;
+      transition: 0.15s;
+    }
+
+    .contact-input-group input:focus {
+      outline: none;
+      border-color: #1f6e8c;
+      box-shadow: 0 0 0 3px #1f6e8c30;
+    }
+
+    .contact-input-group button {
+      background: #1f6e8c;
+      border: none;
+      color: white;
+      font-weight: 600;
+      padding: 0.9rem 2rem;
+      border-radius: 40px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1 1 auto;
+      justify-content: center;
+      box-shadow: 0 6px 12px -5px #1f6e8c70;
+    }
+
+    .contact-input-group button:hover {
+      background: #155a74;
+    }
+
+    .helper-note {
+      font-size: 0.9rem;
+      color: #486581;
+      margin-top: 0.6rem;
+      font-style: italic;
+    }
+
+    /* Confirmation toast */
+    .toast-message {
+      background: #0b3b4f;
+      color: white;
+      padding: 0.8rem 1.4rem;
+      border-radius: 60px;
+      font-weight: 500;
+      display: inline-block;
+      margin-top: 1.2rem;
+      font-size: 0.95rem;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .leaflet-interactive {
+      transition: fill 0.15s, fill-opacity 0.15s, stroke-width 0.15s;
+    }
+
+    .leaflet-container {
+      background: #d4e6f5;
+      font-family: inherit;
+    }
+
+    /* Responsive */
+    @media (max-width: 650px) {
+      .mission h1 { font-size: 1.8rem; }
+      .interactive-card { padding: 1.2rem; }
+      #map { height: 320px; }
+      .housing-btn { padding: 0.6rem 1rem; font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- Mission / overview -->
+  <div class="mission">
+    <h1>🏘️ Albuquerque Tenant Rights</h1>
+    <div class="subhead">Community-powered · Know your rights</div>
+    <p>
+      We are a volunteer organization fighting for safe, stable, and affordable housing in Albuquerque.
+      Your voice matters. Tell us where you live and your housing situation so we can connect you with
+      local resources, tenant meetings, and collective action. This early outreach tool helps us map
+      our community and respond to your needs.
+    </p>
+  </div>
+
+  <!-- Interactive widget -->
+  <div class="interactive-card">
+    <div class="card-title">
+      <h2>📍 Where are you located?</h2>
+      <span>Step 1 of 3</span>
+    </div>
+
+    <!-- Map -->
+    <div id="map"></div>
+
+    <!-- Form panel (dynamically updated) -->
+    <div class="form-panel" id="formPanel">
+      <!-- Step 1: prompt to click map -->
+      <div id="step1Prompt">
+        <p style="display: flex; align-items: center; gap: 8px; font-weight: 500; color: #1e3b4f;">
+          <span style="font-size: 1.4rem;">🗺️</span> Click on your zip code area on the map to begin.
+        </p>
+        <p class="helper-note">Transparent overlays show zip code boundaries. Selected area will darken.</p>
+      </div>
+
+      <!-- Step 2: housing type (hidden initially) -->
+      <div id="step2Housing" class="step-hidden">
+        <div class="selected-area-label">
+          <i>🏡</i> You selected: <span id="selectedZipLabel" class="zip-badge">—</span>
+        </div>
+        <p style="font-weight: 500; color: #0d3b57; margin-bottom: 0.2rem;">What type of housing do you live in?</p>
+        <div class="housing-options">
+          <button class="housing-btn" data-type="rental-home">🏠 Rental home</button>
+          <button class="housing-btn" data-type="rental-apartment">🏢 Rental apartment</button>
+          <button class="housing-btn" data-type="homeowner">🔑 Homeowner</button>
+        </div>
+      </div>
+
+      <!-- Step 3: contact (hidden initially) -->
+      <div id="step3Contact" class="step-hidden">
+        <div class="selected-area-label">
+          <i>✅</i> <span id="summaryLine">Zip: — · Housing: —</span>
+        </div>
+        <p style="font-weight: 500; color: #0d3b57; margin-bottom: 0.2rem;">How can we reach you?</p>
+        <div class="contact-methods">
+          <div class="contact-input-group">
+            <input type="text" id="contactInput" placeholder="Email or phone number" autocomplete="off">
+            <button id="submitContactBtn">📨 Connect me</button>
+          </div>
+          <p class="helper-note">We’ll only use this to share local tenant resources and meeting info.</p>
+        </div>
+        <!-- Confirmation area (shown after submit) -->
+        <div id="confirmationToast" style="display: none;">
+          <div class="toast-message">✔️ Thank you! A volunteer will reach out soon.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // --- ALBUQUERQUE ZIP CODE POLYGONS (simplified, representative) ---
+    // These are approximate boundaries for demo purposes.
+    const zipPolygons = {
+      "87101": [
+        [35.1020, -106.6700], [35.1020, -106.6400], [35.0750, -106.6400],
+        [35.0750, -106.6700], [35.1020, -106.6700]
+      ],
+      "87102": [
+        [35.0950, -106.6600], [35.0950, -106.6200], [35.0650, -106.6200],
+        [35.0650, -106.6600], [35.0950, -106.6600]
+      ],
+      "87104": [
+        [35.1150, -106.6800], [35.1150, -106.6400], [35.0850, -106.6400],
+        [35.0850, -106.6800], [35.1150, -106.6800]
+      ],
+      "87105": [
+        [35.0600, -106.7000], [35.0600, -106.6500], [35.0200, -106.6500],
+        [35.0200, -106.7000], [35.0600, -106.7000]
+      ],
+      "87106": [
+        [35.0950, -106.6200], [35.0950, -106.5800], [35.0550, -106.5800],
+        [35.0550, -106.6200], [35.0950, -106.6200]
+      ],
+      "87107": [
+        [35.1350, -106.6800], [35.1350, -106.6400], [35.0950, -106.6400],
+        [35.0950, -106.6800], [35.1350, -106.6800]
+      ],
+      "87108": [
+        [35.0750, -106.6200], [35.0750, -106.5800], [35.0350, -106.5800],
+        [35.0350, -106.6200], [35.0750, -106.6200]
+      ],
+      "87109": [
+        [35.1550, -106.6300], [35.1550, -106.5900], [35.1150, -106.5900],
+        [35.1150, -106.6300], [35.1550, -106.6300]
+      ],
+      "87110": [
+        [35.1150, -106.5900], [35.1150, -106.5500], [35.0750, -106.5500],
+        [35.0750, -106.5900], [35.1150, -106.5900]
+      ],
+      "87111": [
+        [35.1700, -106.5500], [35.1700, -106.5000], [35.1300, -106.5000],
+        [35.1300, -106.5500], [35.1700, -106.5500]
+      ],
+      "87112": [
+        [35.1300, -106.5500], [35.1300, -106.5000], [35.0900, -106.5000],
+        [35.0900, -106.5500], [35.1300, -106.5500]
+      ],
+      "87114": [
+        [35.1800, -106.7000], [35.1800, -106.6300], [35.1400, -106.6300],
+        [35.1400, -106.7000], [35.1800, -106.7000]
+      ],
+      "87120": [
+        [35.1800, -106.7500], [35.1800, -106.7000], [35.1400, -106.7000],
+        [35.1400, -106.7500], [35.1800, -106.7500]
+      ],
+      "87121": [
+        [35.0600, -106.7500], [35.0600, -106.7000], [35.0200, -106.7000],
+        [35.0200, -106.7500], [35.0600, -106.7500]
+      ],
+      "87122": [
+        [35.2000, -106.5500], [35.2000, -106.4800], [35.1600, -106.4800],
+        [35.1600, -106.5500], [35.2000, -106.5500]
+      ],
+      "87123": [
+        [35.1500, -106.4800], [35.1500, -106.4200], [35.1100, -106.4200],
+        [35.1100, -106.4800], [35.1500, -106.4800]
+      ]
+    };
+
+    // Store layer references
+    const layers = {};
+    let selectedZip = null;
+    let selectedHousing = null;
+
+    // --- Initialise map ---
+    const map = L.map('map').setView([35.1100, -106.6100], 11.5); // Albuquerque center
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; CartoDB',
+      subdomains: 'abcd',
+      maxZoom: 19,
+      minZoom: 10
+    }).addTo(map);
+
+    // --- Draw polygons with transparency ---
+    function addZipLayers() {
+      for (const [zip, coords] of Object.entries(zipPolygons)) {
+        // Convert to Leaflet LatLng format
+        const latlngs = coords.map(pair => [pair[0], pair[1]]);
+        const polygon = L.polygon(latlngs, {
+          color: '#1f6e8c',
+          weight: 2,
+          opacity: 0.8,
+          fillColor: '#1f6e8c',
+          fillOpacity: 0.18,
+          className: 'zip-polygon',
+          zipCode: zip
+        }).addTo(map);
+
+        // Store layer
+        layers[zip] = polygon;
+
+        // Bind tooltip
+        polygon.bindTooltip(`Zip: ${zip}`, { sticky: true, direction: 'top', className: 'zip-tooltip' });
+
+        // Click handler
+        polygon.on('click', (e) => {
+          // Reset all other polygons to default style
+          resetPolygonStyles();
+          // Highlight selected
+          polygon.setStyle({
+            fillColor: '#0b3b4f',
+            fillOpacity: 0.65,
+            color: '#052a38',
+            weight: 3
+          });
+          // Store selected zip
+          selectedZip = zip;
+          // Update UI
+          handleZipSelected(zip);
+        });
+      }
+    }
+
+    function resetPolygonStyles() {
+      for (const [zip, layer] of Object.entries(layers)) {
+        layer.setStyle({
+          fillColor: '#1f6e8c',
+          fillOpacity: 0.18,
+          color: '#1f6e8c',
+          weight: 2,
+          opacity: 0.8
+        });
+      }
+    }
+
+    // --- UI state management ---
+    const step1 = document.getElementById('step1Prompt');
+    const step2 = document.getElementById('step2Housing');
+    const step3 = document.getElementById('step3Contact');
+    const selectedZipLabel = document.getElementById('selectedZipLabel');
+    const summaryLine = document.getElementById('summaryLine');
+    const contactInput = document.getElementById('contactInput');
+    const submitBtn = document.getElementById('submitContactBtn');
+    const confirmationToast = document.getElementById('confirmationToast');
+
+    // Housing buttons
+    const housingBtns = document.querySelectorAll('.housing-btn');
+    let currentHousing = null;
+
+    // Reset housing selection visual
+    function clearHousingSelection() {
+      housingBtns.forEach(btn => btn.classList.remove('selected'));
+      currentHousing = null;
+    }
+
+    // Handle zip selection (called from map click)
+    function handleZipSelected(zip) {
+      // Show step2, hide step1, hide step3
+      step1.classList.add('step-hidden');
+      step2.classList.remove('step-hidden');
+      step3.classList.add('step-hidden');
+      
+      // Update zip label
+      selectedZipLabel.textContent = zip;
+      
+      // Reset housing selection (since new zip)
+      clearHousingSelection();
+      
+      // Hide confirmation toast if visible
+      confirmationToast.style.display = 'none';
+      
+      // Reset housing UI
+      selectedHousing = null;
+      
+      // Reset contact input
+      contactInput.value = '';
+      
+      // update summary (not visible yet)
+      summaryLine.textContent = `Zip: ${zip} · Housing: —`;
+    }
+
+    // --- Housing button event listeners ---
+    housingBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Skip if no zip selected (shouldn't happen)
+        if (!selectedZip) return;
+
+        // Remove selected class from all
+        housingBtns.forEach(b => b.classList.remove('selected'));
+        // Add to clicked
+        btn.classList.add('selected');
+
+        // Determine housing type and label
+        let housingLabel = '';
+        if (btn.dataset.type === 'rental-home') {
+          housingLabel = 'Rental home';
+        } else if (btn.dataset.type === 'rental-apartment') {
+          housingLabel = 'Rental apartment';
+        } else {
+          housingLabel = 'Homeowner';
+        }
+        selectedHousing = housingLabel;
+
+        // update summary text
+        summaryLine.textContent = `Zip: ${selectedZip} · Housing: ${selectedHousing}`;
+
+        // Show step3 (contact), keep step2 visible? Yes, we keep step2 visible so they can change selection.
+        step3.classList.remove('step-hidden');
+        
+        // Hide confirmation if previously shown
+        confirmationToast.style.display = 'none';
+        
+        // Optionally scroll to contact
+        // step3.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
+
+    // --- Contact submit ---
+    submitBtn.addEventListener('click', () => {
+      if (!selectedZip) {
+        alert('Please select a zip code area on the map first.');
+        return;
+      }
+      if (!selectedHousing) {
+        alert('Please select your housing type.');
+        return;
+      }
+      const contactValue = contactInput.value.trim();
+      if (!contactValue) {
+        alert('Please enter an email or phone number so we can reach you.');
+        return;
+      }
+
+      // In a real application, you would send data to a database.
+      // For demonstration, we simulate a save and show confirmation.
+      console.log('📥 Data to save (demo):', {
+        zip: selectedZip,
+        housing: selectedHousing,
+        contact: contactValue,
+        timestamp: new Date().toISOString()
+      });
+
+      // Show confirmation toast
+      confirmationToast.style.display = 'block';
+      
+      // Optionally disable input/button briefly, but we'll keep them active for demo.
+      // Clear input for demo (optional)
+      // contactInput.value = '';  // Not clearing so they see what they typed
+    });
+
+    // --- Reset selection if user clicks on map background (optional) ---
+    // Could add a reset button but not required.
+
+    // --- Initialize map layers ---
+    addZipLayers();
+
+    // Adjust view to fit polygons? Already centered.
+
+    // Add a small reset control? Not necessary for demo.
+
+    // For convenience, pre-select nothing.
+    // But ensure step1 visible, step2 & 3 hidden
+    step1.classList.remove('step-hidden');
+    step2.classList.add('step-hidden');
+    step3.classList.add('step-hidden');
+
+    // Also add a subtle hover effect via CSS is enough.
+
+    // Edge case: if user clicks same zip again, we should not reset housing selection unnecessarily.
+    // But our click handler resets everything – that's fine because it's a fresh selection.
+
+    // Additional: Map on click outside polygons does nothing, keeps selection.
+
+    // Expose map for debugging if needed
+    window.__map = map;
+  })();
+</script>
+</body>
+</html>
