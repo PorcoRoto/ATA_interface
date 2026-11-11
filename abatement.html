@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rent Abatement Worksheet — New Mexico Tenants' Rights</title>
+<style>
+  :root {
+    --bg: #eef1f5;
+    --card: #ffffff;
+    --ink: #1f2328;
+    --muted: #5c6570;
+    --accent: #0b5cad;
+    --accent-dark: #094a8a;
+    --accent-soft: #e6f0fa;
+    --warn-bg: #fff4e5;
+    --warn-border: #e0a33e;
+    --danger: #b3261e;
+    --radius: 14px;
+    --shadow: 0 10px 30px rgba(20, 30, 50, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(1200px 600px at 50% -10%, #ffffff 0%, var(--bg) 60%);
+    color: var(--ink);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header { padding: 1.25rem 1rem 0.5rem; text-align: center; }
+  header h1 { margin: 0 0 .2rem; font-size: 1.35rem; color: var(--accent); }
+  header p { margin: 0; font-size: .85rem; color: var(--muted); }
+
+  .progress-wrap { max-width: 600px; margin: 0.75rem auto 0; padding: 0 1rem; width: 100%; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: .78rem; color: var(--muted); margin-bottom: .3rem; }
+  .progress-track { height: 6px; background: #dfe4ea; border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), #3b8de0); border-radius: 999px; transition: width .45s cubic-bezier(.22,.61,.36,1); }
+
+  .stage {
+    flex: 1; display: flex; align-items: flex-start; justify-content: center;
+    padding: 1.25rem 1rem 2rem; perspective: 1200px; position: relative;
+  }
+
+  .card {
+    width: 100%; max-width: 600px; background: var(--card);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 1.5rem 1.5rem 1.35rem; position: relative;
+    will-change: transform, opacity;
+  }
+  .card.entering { animation: cardIn .5s cubic-bezier(.22,.61,.36,1) both; }
+  .card.leaving-forward { animation: cardOutForward .45s cubic-bezier(.55,.06,.68,.19) forwards; }
+  .card.leaving-back { animation: cardOutBack .45s cubic-bezier(.55,.06,.68,.19) forwards; }
+  @keyframes cardIn { from { opacity:0; transform: translateY(40px) rotateX(6deg) scale(.97);} to { opacity:1; transform: translateY(0) rotateX(0) scale(1);} }
+  @keyframes cardOutForward { from { opacity:1; transform: translateY(0) rotateX(0) scale(1);} to { opacity:0; transform: translateY(-60px) rotateX(-10deg) scale(.94);} }
+  @keyframes cardOutBack { from { opacity:1; transform: translateY(0) rotateX(0) scale(1);} to { opacity:0; transform: translateY(60px) rotateX(10deg) scale(.94);} }
+
+  .eyebrow { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); font-weight: 700; margin-bottom: .4rem; }
+  .card h2 { margin: 0 0 .35rem; font-size: 1.2rem; line-height: 1.3; }
+  .card .sub { margin: 0 0 1.1rem; font-size: .9rem; color: var(--muted); }
+  .hint { font-size: .82rem; color: var(--muted); margin-top: .4rem; }
+  .note {
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    padding: .7rem .85rem; border-radius: 8px; font-size: .85rem; margin-top: .9rem; color: #173a5c;
+  }
+  .warn {
+    background: var(--warn-bg); border-left: 4px solid var(--warn-border);
+    padding: .7rem .85rem; border-radius: 8px; font-size: .85rem; margin-top: .9rem; color: #5a4a2a;
+  }
+
+  input[type="text"], input[type="number"], input[type="tel"], input[type="email"], textarea, select {
+    width: 100%; padding: .7rem .75rem; border: 1px solid #c9ced6; border-radius: 9px;
+    font: inherit; background: #fff; transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(11,92,173,.18); }
+  textarea { min-height: 100px; resize: vertical; }
+
+  .choices { display: grid; gap: .55rem; margin-top: .25rem; }
+  .choice {
+    display: flex; align-items: flex-start; gap: .65rem; padding: .8rem .9rem;
+    border: 1.5px solid #d6dbe2; border-radius: 10px; cursor: pointer; font-weight: 500;
+    transition: border-color .15s, background .15s, transform .1s; user-select: none;
+  }
+  .choice:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .choice:active { transform: scale(.99); }
+  .choice input { position: absolute; opacity: 0; pointer-events: none; }
+  .choice .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #aab3be; flex: 0 0 auto; display: grid; place-items: center; margin-top: .1rem; }
+  .choice .dot::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); transform: scale(0); transition: transform .15s; }
+  .choice input:checked + .dot { border-color: var(--accent); }
+  .choice input:checked + .dot::after { transform: scale(1); }
+  .choice:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .choice .label-title { display: block; font-weight: 600; }
+  .choice .label-desc { display: block; font-size: .82rem; color: var(--muted); font-weight: 400; margin-top: .15rem; }
+
+  /* Multi-select checkboxes */
+  .checks { display: grid; grid-template-columns: 1fr; gap: .5rem; margin-top: .25rem; }
+  @media (min-width: 520px) { .checks { grid-template-columns: 1fr 1fr; } }
+  .check {
+    display: flex; align-items: flex-start; gap: .55rem; padding: .65rem .75rem;
+    border: 1.5px solid #d6dbe2; border-radius: 9px; cursor: pointer; font-size: .92rem;
+    transition: border-color .15s, background .15s;
+  }
+  .check:hover { border-color: var(--accent); }
+  .check input { position: absolute; opacity: 0; pointer-events: none; }
+  .check .box { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #aab3be; flex: 0 0 auto; display: grid; place-items: center; margin-top: .05rem; transition: background .15s, border-color .15s; }
+  .check .box::after { content: ""; width: 9px; height: 9px; border-radius: 2px; background: #fff; transform: scale(0); transition: transform .12s; }
+  .check input:checked + .box { background: var(--accent); border-color: var(--accent); }
+  .check input:checked + .box::after { transform: scale(1); }
+  .check:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+
+  .field { margin-bottom: .9rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: .3rem; }
+
+  .nav { display: flex; justify-content: space-between; align-items: center; gap: .75rem; margin-top: 1.3rem; }
+  .nav .spacer { flex: 1; }
+  button { font: inherit; font-weight: 600; padding: .65rem 1.15rem; border-radius: 9px; border: 1px solid transparent; cursor: pointer; transition: background .15s, transform .1s, box-shadow .15s; }
+  button:active { transform: scale(.98); }
+  .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 6px 16px rgba(11,92,173,.25); }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-ghost { background: transparent; color: var(--muted); }
+  .btn-ghost:hover { color: var(--ink); background: #eceff2; }
+  .btn-secondary { background: #fff; border-color: #c9ced6; color: var(--ink); }
+  .btn-secondary:hover { background: #f0f2f5; }
+
+  .error { color: var(--danger); font-size: .82rem; margin-top: .4rem; min-height: 1em; }
+
+  .big-number { font-size: 2.4rem; font-weight: 800; color: var(--accent); margin: .4rem 0 .2rem; line-height: 1; }
+  .summary-list { margin: 1rem 0 0; padding: 0; list-style: none; font-size: .9rem; }
+  .summary-list li { padding: .45rem 0; border-bottom: 1px solid #edf0f3; display: flex; gap: .5rem; }
+  .summary-list li:last-child { border-bottom: none; }
+  .summary-list .k { color: var(--muted); flex: 0 0 44%; }
+  .summary-list .v { font-weight: 500; word-break: break-word; }
+
+  .verdict { padding: .85rem 1rem; border-radius: 10px; font-size: .9rem; margin-bottom: .75rem; }
+  .verdict.confident { background: #e7f5ec; border: 1px solid #7cc49a; color: #1d5b37; }
+  .verdict.caution { background: var(--warn-bg); border: 1px solid var(--warn-border); color: #5a4a2a; }
+
+  footer { text-align: center; font-size: .78rem; color: var(--muted); padding: .75rem 1rem 1.25rem; max-width: 640px; margin: 0 auto; }
+
+  @media (max-width: 480px) {
+    .card { padding: 1.2rem 1.1rem 1.1rem; }
+    .card h2 { font-size: 1.1rem; }
+    header h1 { font-size: 1.15rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card.entering, .card.leaving-forward, .card.leaving-back { animation: none; }
+    .progress-fill { transition: none; }
+  }
+  @media print {
+    header, .progress-wrap, .nav, footer { display: none !important; }
+    body { background: #fff; }
+    .stage { padding: 0; display: block; }
+    .card { box-shadow: none; max-width: 100%; padding: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Rent Abatement Worksheet</h1>
+  <p>New Mexico tenants' rights · NMSA § 47-8-27.2(A)</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span id="stepLabel">Step 1</span>
+    <span id="stepCount"></span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<main class="stage" id="stage" aria-live="polite"></main>
+
+<footer>
+  <p><strong>Privacy:</strong> This worksheet runs entirely in your browser. Nothing is transmitted or stored when you use this page. Printing or saving a PDF keeps that file under your control.</p>
+  <p>Contact: text (xxx) xxx-xxxx · Signal @ABQtenants</p>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ===============================================================
+     CONFIG — review this block with your lawyer.
+     =============================================================== */
+  const CONFIG = {
+    // NMSA § 47-8-27.2: owner has 7 days after written notice to remedy.
+    NOTICE_REMEDY_DAYS: 7,
+    // Pro-rata daily rent divisor used by the worksheet.
+    DAYS_PER_MONTH: 30,
+    // Abatement rates, per the statute.
+    RATE_UNINHABITABLE: 1.0, // 100% of daily rent if dwelling is uninhabitable and not inhabited
+    RATE_HABITABLE: 1 / 3,   // 1/3 of pro-rata daily rent if habitable
+  };
+
+  const DEFICIENCY_OPTIONS = [
+    ["heating", "Heating system"],
+    ["refrigerated_air", "Refrigerated air (central or minisplit)"],
+    ["swamp_cooler", "Swamp cooler"],
+    ["broken_window", "Broken window"],
+    ["kitchen_appliance", "Kitchen appliance"],
+    ["carbon_monoxide", "Carbon monoxide leak"],
+    ["leaking_roof", "Leaking roof"],
+    ["sagging_floor", "Sagging floor"],
+    ["plumbing", "Plumbing issue (toilet, sink, bath, etc.)"],
+    ["electrical", "Electrical issue (outlet not working, exposed wiring, blown fuse, etc.)"],
+    ["other", "Other (describe below)"]
+  ];
+
+  const LIVABILITY_OPTIONS = [
+    ["unlivable", "Unlivable", "I cannot live in the unit because of the condition."],
+    ["severe", "Livable with severe inconvenience", "I can stay, but the condition seriously disrupts daily life."],
+    ["minor", "Livable with minor inconvenience", "I can stay; the condition is a nuisance."]
+  ];
+
+  const FAULT_OPTIONS = [
+    ["landlord", "The landlord is responsible", "The deficiency is the landlord's responsibility to fix."],
+    ["tenant", "I could be held at fault", "The deficiency may be attributed to tenant action or neglect."],
+    ["beyond", "Beyond anyone's control", "Fire, flood, earthquake, or other circumstance outside anyone's control."]
+  ];
+
+  const NOTICE_OPTIONS = [
+    ["yes", "Yes, I gave written notice"],
+    ["no", "No, I have not given written notice"],
+    ["unsure", "Not sure / I gave only verbal notice"]
+  ];
+
+  /* ===============================================================
+     STATE
+     =============================================================== */
+  const answers = {
+    livability: "",
+    fault: "",
+    notice: "",
+    daysSinceNotice: "",
+    rent: "",
+    deficiencies: [],       // array of ids
+    deficiencyOther: "",
+    otherInfo: "",
+    landlordName: "",
+    propertyManagerName: "",
+    businessName: "",
+    landlordPhone: "",
+    landlordEmail: "",
+    landlordOtherInfo: ""
+  };
+
+  /* ===============================================================
+     CARD DEFINITIONS
+     =============================================================== */
+  const cards = [
+    {
+      id: "welcome",
+      eyebrow: "Before you begin",
+      title: "Welcome",
+      sub: "A few quick questions will help you estimate whether pursuing rent abatement may be worthwhile. It takes about 2 minutes.",
+      isRelevant: () => true,
+      render: () => `
+        <div class="warn">
+          <strong>Not legal advice.</strong> This worksheet is not legally binding and produces an estimate only.
+          Withholding rent improperly can lead to eviction — consult a lawyer or your local tenants' rights
+          organization before acting.
+        </div>`,
+      validate: () => ({ ok: true })
+    },
+    {
+      id: "livability",
+      eyebrow: "Habitability",
+      title: "Are you able to live in your housing?",
+      sub: "Choose the option that best describes your situation.",
+      isRelevant: () => true,
+      render: (s) => radioGroup("livability",
+        LIVABILITY_OPTIONS.map(([val, title, desc]) => ({ val, title, desc })),
+        s.livability),
+      validate: (s) => s.livability ? { ok: true } : { ok: false, message: "Please choose an option." }
+    },
+    {
+      id: "fault",
+      eyebrow: "Responsibility",
+      title: "Who is responsible for the deficiency?",
+      sub: "This helps us tailor guidance and community support. Fault is not a statutory requirement for abatement, but it affects the confidence of our estimate.",
+      isRelevant: () => true,
+      render: (s) => radioGroup("fault",
+        FAULT_OPTIONS.map(([val, title, desc]) => ({ val, title, desc })),
+        s.fault),
+      validate: (s) => s.fault ? { ok: true } : { ok: false, message: "Please choose an option." }
+    },
+    {
+      id: "notice",
+      eyebrow: "Notice to landlord",
+      title: "Have you given your landlord written notice of the deficiencies?",
+      sub: "Under NMSA § 47-8-27.2, written notice is required before rent can be abated.",
+      isRelevant: () => true,
+      render: (s) => radioGroup("notice",
+        NOTICE_OPTIONS.map(([val, title]) => ({ val, title })),
+        s.notice) + `
+        <div class="note">
+          <strong>Written notice matters.</strong> Verbal notice generally does not trigger abatement rights under New Mexico law.
+          Keep copies of all written communications with your landlord (letters, emails, texts, repair requests).
+        </div>`,
+      validate: (s) => s.notice ? { ok: true } : { ok: false, message: "Please choose an option." }
+    },
+    {
+      id: "daysSinceNotice",
+      eyebrow: "Notice to landlord",
+      title: "How many days has it been since your written notice was delivered?",
+      sub: "Your landlord has 7 days after written notice to make repairs before rent can be abated.",
+      isRelevant: (s) => s.notice === "yes",
+      render: (s) => `
+        <input type="number" id="in-days-notice" min="0" step="1" inputmode="numeric"
+          placeholder="e.g., 10" value="${esc(s.daysSinceNotice)}" />
+        <div class="note">
+          Keep documentation of all communications with your landlord — letters, emails, texts, and photos of the deficiency.
+        </div>
+        <div class="error" id="err-daysSinceNotice"></div>`,
+      validate: (s) => {
+        const v = parseInt(s.daysSinceNotice, 10);
+        if (!isFinite(v) || v < 0) return { ok: false, message: "Please enter a number of days (0 or more)." };
+        return { ok: true };
+      }
+    },
+    {
+      id: "rent",
+      eyebrow: "Rent",
+      title: "How much do you pay in monthly rent?",
+      sub: "Enter the amount in U.S. dollars. This is used to calculate the daily accrual of abatement.",
+      isRelevant: () => true,
+      render: (s) => `
+        <input type="number" id="in-rent" min="0" step="0.01" inputmode="decimal"
+          placeholder="e.g., 1200" value="${esc(s.rent)}" />
+        <div class="hint">Daily rent = monthly rent ÷ 30.</div>
+        <div class="error" id="err-rent"></div>`,
+      validate: (s) => {
+        const v = parseFloat(s.rent);
+        if (!isFinite(v) || v <= 0) return { ok: false, message: "Please enter a valid monthly rent amount." };
+        return { ok: true };
+      }
+    },
+    {
+      id: "deficiencies",
+      eyebrow: "Deficiencies",
+      title: "Which housing deficiencies are you experiencing?",
+      sub: "Select all that apply.",
+      isRelevant: () => true,
+      render: (s) => checkGroup("deficiencies", DEFICIENCY_OPTIONS, s.deficiencies) + `
+        <div class="field" style="margin-top:1rem;">
+          <label for="in-deficiencyOther">Other deficiencies (describe)</label>
+          <textarea id="in-deficiencyOther" placeholder="Describe any deficiencies not listed above.">${esc(s.deficiencyOther)}</textarea>
+        </div>
+        <div class="error" id="err-deficiencies"></div>`,
+      validate: (s) => {
+        if (!s.deficiencies.length && !s.deficiencyOther.trim()) {
+          return { ok: false, message: "Please select at least one deficiency or describe one under 'Other'." };
+        }
+        return { ok: true };
+      }
+    },
+    {
+      id: "otherInfo",
+      eyebrow: "Additional information",
+      title: "Any other relevant information?",
+      sub: "Optional. This will not affect your estimate, but will be shared with community organizers if data collection is enabled.",
+      isRelevant: () => true,
+      render: (s) => `
+        <textarea id="in-otherInfo" placeholder="Anything else we should know?">${esc(s.otherInfo)}</textarea>
+        <div class="hint">Be mindful of identifying information — do not include Social Security numbers, bank details, or other sensitive data.</div>`,
+      validate: () => ({ ok: true })
+    },
+    {
+      id: "landlordInfo",
+      eyebrow: "Landlord information",
+      title: "Identifying information about your landlord",
+      sub: "Provide as much as you can. Some of this may be used to draft an abatement notice.",
+      isRelevant: () => true,
+      render: (s) => `
+        <div class="field">
+          <label for="in-landlordName">Landlord name</label>
+          <input type="text" id="in-landlordName" value="${esc(s.landlordName)}" />
+        </div>
+        <div class="field">
+          <label for="in-propertyManagerName">Property manager name</label>
+          <input type="text" id="in-propertyManagerName" value="${esc(s.propertyManagerName)}" />
+        </div>
+        <div class="field">
+          <label for="in-businessName">Business / property company name</label>
+          <input type="text" id="in-businessName" value="${esc(s.businessName)}" />
+        </div>
+        <div class="field">
+          <label for="in-landlordPhone">Telephone number</label>
+          <input type="tel" id="in-landlordPhone" value="${esc(s.landlordPhone)}" />
+        </div>
+        <div class="field">
+          <label for="in-landlordEmail">Email address</label>
+          <input type="email" id="in-landlordEmail" value="${esc(s.landlordEmail)}" />
+        </div>
+        <div class="field">
+          <label for="in-landlordOtherInfo">Other useful identifying information</label>
+          <textarea id="in-landlordOtherInfo" placeholder="Mailing address, management company, etc.">${esc(s.landlordOtherInfo)}</textarea>
+        </div>`,
+      validate: () => ({ ok: true })
+    },
+    {
+      id: "result",
+      eyebrow: "Your estimate",
+      title: "Estimated abatement",
+      sub: "Based on your answers.",
+      isRelevant: () => true,
+      isTerminal: true,
+      render: () => `<div id="resultBody"></div>`,
+      validate: () => ({ ok: true })
+    }
+  ];
+
+  /* ===============================================================
+     RUNTIME
+     =============================================================== */
+  const stage = document.getElementById("stage");
+  const progressFill = document.getElementById("progressFill");
+  const stepLabel = document.getElementById("stepLabel");
+  const stepCount = document.getElementById("stepCount");
+
+  let history = [];
+  let currentId = null;
+  let animating = false;
+
+  function esc(v) {
+    return String(v == null ? "" : v)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function radioGroup(name, options, current) {
+    return `<div class="choices" role="radiogroup">` +
+      options.map(o => `
+        <label class="choice">
+          <input type="radio" name="${name}" value="${o.val}" ${current === o.val ? "checked" : ""}>
+          <span class="dot"></span>
+          <span>
+            <span class="label-title">${esc(o.title)}</span>
+            ${o.desc ? `<span class="label-desc">${esc(o.desc)}</span>` : ""}
+          </span>
+        </label>`).join("") +
+      `</div><div class="error" id="err-${name}"></div>`;
+  }
+
+  function checkGroup(name, options, selected) {
+    return `<div class="checks" role="group">` +
+      options.map(([val, label]) => `
+        <label class="check">
+          <input type="checkbox" name="${name}" value="${val}" ${selected.includes(val) ? "checked" : ""}>
+          <span class="box"></span>
+          <span>${esc(label)}</span>
+        </label>`).join("") +
+      `</div>`;
+  }
+
+  function relevantCards() {
+    return cards.filter(c => c.isRelevant(answers));
+  }
+
+  function cardById(id) {
+    return cards.find(c => c.id === id);
+  }
+
+  function collectCurrent() {
+    const card = cardById(currentId);
+    if (!card || card.isTerminal) return;
+    const root = stage.querySelector(".card");
+    if (!root) return;
+
+    const val = (id) => { const el = root.querySelector("#" + id); return el ? el.value : ""; };
+
+    if (currentId === "livability") answers.livability = checkedRadio(root, "livability");
+    else if (currentId === "fault") answers.fault = checkedRadio(root, "fault");
+    else if (currentId === "notice") answers.notice = checkedRadio(root, "notice");
+    else if (currentId === "daysSinceNotice") answers.daysSinceNotice = val("in-days-notice");
+    else if (currentId === "rent") answers.rent = val("in-rent");
+    else if (currentId === "deficiencies") {
+      answers.deficiencies = Array.from(root.querySelectorAll('input[name="deficiencies"]:checked')).map(el => el.value);
+      answers.deficiencyOther = val("in-deficiencyOther");
+    }
+    else if (currentId === "otherInfo") answers.otherInfo = val("in-otherInfo");
+    else if (currentId === "landlordInfo") {
+      answers.landlordName = val("in-landlordName");
+      answers.propertyManagerName = val("in-propertyManagerName");
+      answers.businessName = val("in-businessName");
+      answers.landlordPhone = val("in-landlordPhone");
+      answers.landlordEmail = val("in-landlordEmail");
+      answers.landlordOtherInfo = val("in-landlordOtherInfo");
+    }
+
+    function checkedRadio(root, name) {
+      const el = root.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : "";
+    }
+  }
+
+  function renderCard(card) {
+    const relevant = relevantCards();
+    const idx = relevant.findIndex(c => c.id === card.id);
+    stepLabel.textContent = `Step ${idx + 1}`;
+    stepCount.textContent = `of ${relevant.length}`;
+    progressFill.style.width = `${((idx + 1) / relevant.length) * 100}%`;
+
+    const el = document.createElement("div");
+    el.className = "card entering";
+    el.setAttribute("role", "group");
+    el.setAttribute("aria-label", card.title);
+    el.innerHTML = `
+      <div class="eyebrow">${esc(card.eyebrow)}</div>
+      <h2>${esc(card.title)}</h2>
+      ${card.sub ? `<p class="sub">${esc(card.sub)}</p>` : ""}
+      <div class="body">${card.render(answers)}</div>
+      <div class="nav">
+        ${history.length ? `<button type="button" class="btn-ghost" data-nav="back">← Back</button>` : `<span class="spacer"></span>`}
+        <button type="button" class="btn-primary" data-nav="next">${card.isTerminal ? "Start over" : "Next →"}</button>
+      </div>
+    `;
+
+    stage.innerHTML = "";
+    stage.appendChild(el);
+    currentId = card.id;
+
+    if (card.isTerminal) {
+      renderResult();
+      el.querySelector('[data-nav="next"]').addEventListener("click", () => {
+        resetAll();
+        transitionTo(relevantCards()[0].id, "back");
+      });
+    } else {
+      el.querySelector('[data-nav="next"]').addEventListener("click", advance);
+      const backBtn = el.querySelector('[data-nav="back"]');
+      if (backBtn) backBtn.addEventListener("click", goBack);
+
+      el.addEventListener("input", collectCurrent);
+      el.addEventListener("change", collectCurrent);
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && e.target.tagName !== "TEXTAREA") {
+          e.preventDefault();
+          advance();
+        }
+      });
+
+      const first = el.querySelector("input, select, textarea");
+      if (first) setTimeout(() => first.focus({ preventScroll: true }), 250);
+    }
+
+    requestAnimationFrame(() => el.classList.remove("entering"));
+  }
+
+  function advance() {
+    if (animating) return;
+    collectCurrent();
+    const card = cardById(currentId);
+    const check = card.validate(answers);
+    if (!check.ok) {
+      const err = stage.querySelector(".error");
+      if (err) err.textContent = check.message;
+      return;
+    }
+    const relevant = relevantCards();
+    const idx = relevant.findIndex(c => c.id === currentId);
+    const next = relevant[idx + 1];
+    if (!next) return;
+    history.push(currentId);
+    transitionTo(next.id, "forward");
+  }
+
+  function goBack() {
+    if (animating) return;
+    collectCurrent();
+    if (!history.length) return;
+    const prevId = history.pop();
+    transitionTo(prevId, "back");
+  }
+
+  function transitionTo(nextId, direction) {
+    if (animating) return;
+    animating = true;
+    const outgoing = stage.querySelector(".card");
+    if (outgoing) {
+      outgoing.classList.add(direction === "forward" ? "leaving-forward" : "leaving-back");
+      const done = () => { renderCard(cardById(nextId)); animating = false; };
+      outgoing.addEventListener("animationend", done, { once: true });
+      setTimeout(() => { if (animating) done(); }, 500);
+    } else {
+      renderCard(cardById(nextId));
+      animating = false;
+    }
+  }
+
+  function resetAll() {
+    Object.keys(answers).forEach(k => {
+      answers[k] = Array.isArray(answers[k]) ? [] : "";
+    });
+    history = [];
+  }
+
+  /* ===============================================================
+     CALCULATION — review with your lawyer.
+     =============================================================== */
+  function computeEstimate() {
+    const rent = parseFloat(answers.rent) || 0;
+    const dailyRent = rent / CONFIG.DAYS_PER_MONTH;
+
+    // Abatement rate is set by livability, per statute.
+    let rate = 0;
+    if (answers.livability === "unlivable") rate = CONFIG.RATE_UNINHABITABLE;
+    else if (answers.livability === "severe" || answers.livability === "minor") rate = CONFIG.RATE_HABITABLE;
+
+    // Days since written notice. If no written notice was given, no abatement has accrued.
+    const noticeGiven = answers.notice === "yes";
+    const daysSinceNotice = noticeGiven ? (parseInt(answers.daysSinceNotice, 10) || 0) : 0;
+    const thresholdReached = daysSinceNotice >= CONFIG.NOTICE_REMEDY_DAYS;
+
+    // Abatement accrues from the date of written notice, once the 7-day remedy window has passed.
+    // If the threshold has not been reached, no abatement has legally accrued yet.
+    const accruedDays = thresholdReached ? daysSinceNotice : 0;
+    const accruedAmount = dailyRent * rate * accruedDays;
+    const dailyAccrual = dailyRent * rate;
+
+    // Projected amount at day 7 if threshold not yet reached.
+    const projectedAtThreshold = !thresholdReached ? dailyRent * rate * CONFIG.NOTICE_REMEDY_DAYS : null;
+    const daysUntilThreshold = !thresholdReached ? Math.max(0, CONFIG.NOTICE_REMEDY_DAYS - daysSinceNotice) : 0;
+
+    return {
+      rent, dailyRent, rate, noticeGiven, daysSinceNotice,
+      thresholdReached, accruedDays, accruedAmount,
+      dailyAccrual, projectedAtThreshold, daysUntilThreshold
+    };
+  }
+
+  function money(n) {
+    return (Number(n) || 0).toLocaleString(undefined, { style: "currency", currency: "USD" });
+  }
+
+  function labelForDeficiency(v) {
+    const found = DEFICIENCY_OPTIONS.find(([val]) => val === v);
+    return found ? found[1] : v;
+  }
+
+  function renderResult() {
+    const r = computeEstimate();
+    const body = document.getElementById("resultBody");
+    if (!body) return;
+
+    const cautionary = answers.fault !== "landlord";
+    const verdictClass = cautionary ? "caution" : "confident";
+    const verdictText = cautionary
+      ? `<strong>Caution:</strong> Based on your answers, the deficiency may not be the landlord's responsibility. Abatement may not be available, and withholding rent without confirming your rights could put you at risk of eviction. We recommend contacting our organization for support before acting.`
+      : `<strong>Potential abatement available.</strong> Based on your answers, you may be entitled to abate rent under NMSA § 47-8-27.2. Confirm your notice and documentation before withholding rent.`;
+
+    const rows = [];
+    rows.push(["Livability", livabilityLabel(answers.livability)]);
+    rows.push(["Responsibility", faultLabel(answers.fault)]);
+    rows.push(["Written notice given", answers.notice === "yes" ? "Yes" : (answers.notice === "no" ? "No" : "Unsure / verbal only")]);
+    if (answers.notice === "yes") rows.push(["Days since written notice", String(r.daysSinceNotice)]);
+    rows.push(["Monthly rent", money(r.rent)]);
+    rows.push(["Daily rent (÷30)", money(r.dailyRent)]);
+    rows.push(["Abatement rate", r.rate === CONFIG.RATE_UNINHABITABLE ? "100%" : "1/3"]);
+    rows.push(["Daily accrual", money(r.dailyAccrual)]);
+    if (answers.deficiencies.length) rows.push(["Deficiencies", answers.deficiencies.map(labelForDeficiency).join("; ")]);
+    if (answers.deficiencyOther.trim()) rows.push(["Other deficiencies", answers.deficiencyOther.trim()]);
+    if (answers.landlordName) rows.push(["Landlord", answers.landlordName]);
+    if (answers.propertyManagerName) rows.push(["Property manager", answers.propertyManagerName]);
+    if (answers.businessName) rows.push(["Business", answers.businessName]);
+
+    let accrualBlock = "";
+    if (!r.noticeGiven) {
+      accrualBlock = `
+        <div class="warn" style="margin-top:.9rem;">
+          No written notice has been given, so no abatement has accrued under NMSA § 47-8-27.2.
+          Written notice is required before rent can be abated.
+        </div>`;
+    } else if (!r.thresholdReached) {
+      accrualBlock = `
+        <div class="warn" style="margin-top:.9rem;">
+          The 7-day remedy period has not yet passed (${r.daysUntilThreshold} day(s) remaining).
+          <strong>No abatement has legally accrued yet.</strong>
+          If repairs are not made by day 7, approximately <strong>${money(r.projectedAtThreshold)}</strong>
+          will have accrued by that date, and will continue to accrue at <strong>${money(r.dailyAccrual)}</strong> per day thereafter.
+        </div>`;
+    } else {
+      accrualBlock = `
+        <div class="note" style="margin-top:.9rem;">
+          Abatement has accrued from the date of written notice, at <strong>${money(r.dailyAccrual)}</strong> per day.
+          If repairs are not made, this amount continues to increase each day.
+        </div>`;
+    }
+
+    const communityOffer = cautionary
+      ? `<div class="note" style="margin-top:.9rem;">
+           Our organization may be able to coordinate community support to help rectify the deficiency.
+           <a href="mailto:organizers@example.org">Contact us</a> to discuss options.
+         </div>`
+      : "";
+
+    body.innerHTML = `
+      <div class="verdict ${verdictClass}">${verdictText}</div>
+      <p class="hint">Potential abatement accrued to date:</p>
+      <p class="big-number">${money(r.accruedAmount)}</p>
+      <p class="hint">This figure increases by <strong>${money(r.dailyAccrual)}</strong> each day repairs are not made.</p>
+      ${accrualBlock}
+      ${communityOffer}
+      <ul class="summary-list">
+        ${rows.map(([k, v]) => `<li><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></li>`).join("")}
+      </ul>
+      <div class="warn" style="margin-top:1rem;">
+        This estimate is not legal advice and is not binding. Before withholding rent, confirm your rights
+        and follow notice requirements under NMSA § 47-8-27.2 and related statutes, ideally with help from
+        a lawyer or your local tenants' rights organization.
+      </div>
+      <div class="nav" style="margin-top:1rem;">
+        <button type="button" class="btn-secondary" id="printBtn">Print / save as PDF</button>
+      </div>
+    `;
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+  }
+
+  function livabilityLabel(v) {
+    const found = LIVABILITY_OPTIONS.find(([val]) => val === v);
+    return found ? found[1] : v;
+  }
+  function faultLabel(v) {
+    const found = FAULT_OPTIONS.find(([val]) => val === v);
+    return found ? found[1] : v;
+  }
+
+  /* ===============================================================
+     BOOT
+     =============================================================== */
+  renderCard(cards[0]);
+})();
+</script>
+</body>
+</html>
